@@ -1,14 +1,16 @@
 # main.py Notes:
-# Main program logic
-# Combines input, loops and functions
+from functions import greet, custom_farewell
 
-from functions import greet, farewell, custom_farewell
+while True: # Loop for multiple sessions
+    name = input("Enter your name:")
+    times = int(input("How many times would you like to be greeted?"))
 
-name = input("Enter your name:")
-times = int(input("How many greetings would you like?"))
-                  
-greet(name, times)
+    greet(name, times)
 
-# Ask user for a custom farewell
-farewell_message = input ("Enter a farewell message:") 
-custom_farewell(name, farewell_message)
+    farewell_message = input("Enter a farewell message:")
+    custom_farewell(name, farewell_message)
+
+    repeat = input("Do you want to run another session? (yes/no):").lower()
+    if repeat != "yes":
+     print("Exiting the program. Goodbye!")
+     break 
