@@ -4,7 +4,10 @@
 
 def greet(name, times):
     for i in range(times):
-            print(f"Hello {name}! (greeting {i+1})")
+       print(f"Hello {name}! (greeting {i+1})")
+
+def farewell(name):
+       print(f"Goodbye {name}! See you next time!")
         
-def farewell(name):       
-        print(f"Goodbye {name}! See you next time, see ya!")
+def custom_farewell(name, farewell_message):       
+       print(f"{farewell_message} {name}! See you next time!")
