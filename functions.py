@@ -10,4 +10,4 @@ def farewell(name):
        print(f"Goodbye {name}! See you next time!")
         
 def custom_farewell(name, farewell_message):       
-       print(f"{farewell_message} {name}! See you next time!")
+       print(f"{farewell_message}, {name}!")

@@ -1,22 +1,23 @@
+# Notes: Refactored Greeting App with Input Validation, Else/Finally and Helpers
+
+# Import project functions and helpers
 from functions import greet, custom_farewell
+from helpers import get_nonempty_name, get_positive_number, get_yes_no
+from file_utils import save_greetings
 
-while True:  # Loop for multiple sessions
-    name = input("Enter your name:")
-    try:
-        times = int(input("How many times would you like to be greeted?"))
-        if times <= 0:
-            print("Please enter a number greater than 0.")
-            continue
-    except ValueError:
-        print("Invalid input. Please enter a valid number.")
-        continue
+while True:
+    name = get_nonempty_name()  # Get a valid name from user
+    times = get_positive_number("How many times would you like to be greeted? ")
 
-    greet(name, times)
+    greet(name, times)  # Greet the user specified number of times
+    save_greetings(name, times)  # log the session
 
-    farewell_message = input("Enter a farewell message:")
+    farewell_message = input("Enter a farewell message: ")
     custom_farewell(name, farewell_message)
 
-    repeat = input("Do you want to run another session? (yes/no):").lower()
-    if repeat != "yes":
-        print("Exiting the program. Goodbye!")
+    print()  # Spacing
+
+    repeat = get_yes_no("Would you like to run the session again? (yes/no): ")
+    if repeat == "no":
+        print("Thank you for using the Greeting App. Goodbye!")
         break

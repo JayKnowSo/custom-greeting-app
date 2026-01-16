@@ -1,0 +1,12 @@
+User: TestUser
+Greetings count: 1
+-------------------------
+User: Jay
+Greetings count: 3
+-------------------------
+User: Jay
+Greetings count: 3
+-------------------------
+User: Lisa
+Greetings count: 2
+-------------------------
