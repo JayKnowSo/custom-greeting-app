@@ -4,6 +4,7 @@
 from functions import greet, custom_farewell
 from helpers import get_nonempty_name, get_positive_number, get_yes_no
 from file_utils import save_greetings
+from math_tables import get_multiplication_table
 
 while True:
     name = get_nonempty_name()  # Get a valid name from user

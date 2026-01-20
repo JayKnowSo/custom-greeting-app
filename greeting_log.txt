@@ -10,3 +10,6 @@ Greetings count: 3
 User: Lisa
 Greetings count: 2
 -------------------------
+User: Jay
+Greetings count: 3
+-------------------------
