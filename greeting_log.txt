@@ -13,3 +13,18 @@ Greetings count: 2
 User: Jay
 Greetings count: 3
 -------------------------
+User: Charlie
+Greetings count: 6
+-------------------------
+User: David
+Greetings count: 6
+-------------------------
+User: Lisa
+Greetings count: 2
+-------------------------
+User: John
+Greetings count: 1
+-------------------------
+User: Lisa
+Greetings count: 4
+-------------------------

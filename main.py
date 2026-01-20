@@ -5,6 +5,7 @@ from functions import greet, custom_farewell
 from helpers import get_nonempty_name, get_positive_number, get_yes_no
 from file_utils import save_greetings
 from math_tables import get_multiplication_table
+from functions import save_table_to_file
 
 while True:
     name = get_nonempty_name()  # Get a valid name from user
@@ -12,6 +13,14 @@ while True:
 
     greet(name, times)  # Greet the user specified number of times
     save_greetings(name, times)  # log the session
+
+    number = get_positive_number("Enter a number to generate its multiplication table: ")
+    table = get_multiplication_table(number)
+    for line in table:
+        print(line)
+        
+    save_table_to_file(name, number, table)  # Save multiplication table to file
+    print("table saved to file.\n")
 
     farewell_message = input("Enter a farewell message: ")
     custom_farewell(name, farewell_message)

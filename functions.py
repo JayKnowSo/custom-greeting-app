@@ -11,3 +11,12 @@ def farewell(name):
         
 def custom_farewell(name, farewell_message):       
        print(f"{farewell_message}, {name}!")
+
+def save_table_to_file(name, number, table):
+    """Saves the multiplication table to a log file."""
+    filename = f"{name}_multiplication_table.txt"
+    with open("greetings_log.txt", "a") as file:
+        file.write(f"{name}'s multiplication table for {number}:\n")
+        for line in table:
+            file.write(line + "\n")
+        file.write("-" * 30 + "\n")  # Add a newline for separation
