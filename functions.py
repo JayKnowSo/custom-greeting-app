@@ -28,3 +28,34 @@ def read_greetings_log():
                      return file.read()
              except FileNotFoundError:
                  return "The greetings log file does not exist yet."
+             
+def parse_greetings_log():
+    """parse greetings_log.txt into structured data."""
+    sessions = []
+    current_session = None
+    
+    try:
+        with open("greetings_log.txt", "r") as file:
+            for line in file:
+                line = line.strip()
+
+                if not line:
+                     continue  # Skip empty lines
+
+                if line.startswith("-"):
+                     if current_session:
+                          sessions.append(current_session)
+                          current_session = None
+                elif " x " in line and current_session:
+                        current_session["table"].append(line)
+                else:
+                    current_session = {
+                        "name": line,
+                        "table": []
+                   }
+                
+        if current_session:
+             sessions.append(current_session)
+    except FileNotFoundError:
+         pass
+    return sessions

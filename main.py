@@ -1,7 +1,7 @@
 # Notes: Refactored Greeting App with Input Validation, Else/Finally and Helpers
 
 # Import project functions and helpers
-from functions import greet, custom_farewell, save_table_to_file, read_greetings_log
+from functions import greet, custom_farewell, save_table_to_file, read_greetings_log, parse_greetings_log
 from helpers import get_nonempty_name, get_positive_number, get_yes_no
 from math_tables import get_multiplication_table
 
@@ -45,4 +45,11 @@ while True:
             log_contents = read_greetings_log()
             print("\n--- Greetings Log ---")
             print(log_contents)
+
+            parsed_sessions = parse_greetings_log()
+            print("\n---parases sessions ---")
+            for session in parsed_sessions:
+                print(f"name: {session['name']}")
+                for line in session["table"]:
+                    print("", line)
         break  # Exit the loop and end the program
