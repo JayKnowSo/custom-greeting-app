@@ -20,3 +20,11 @@ def save_table_to_file(name, number, table):
         for line in table:
             file.write(line + "\n")
         file.write("-" * 30 + "\n")  # Add a newline for separation
+
+def read_greetings_log():
+             """Reads and prints the contents of greetings_log.txt"""
+             try:
+                 with open("greetings_log.txt", "r") as file:
+                     return file.read()
+             except FileNotFoundError:
+                 return "The greetings log file does not exist yet."
