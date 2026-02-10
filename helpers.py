@@ -20,8 +20,6 @@ def get_positive_number(prompt): # May raise ValueError
                 print("Please enter a number greater than 0.")
              else: # Only runs if number is valid
                  return number # Exits loop properly
-        finally: # Always run this for spacing or cleanup
-            print() # adds a blank line for spacing
 
 def get_yes_no(prompt):
     """Prompt the user for a 'yes' or 'no' answer."""

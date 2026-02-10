@@ -1,11 +1,19 @@
 # functions.py
 # Notes: All reusable code lives here
 # Functions return values or print messages
-import re
+# JSON handles persistence
+# Main.py only controls flow and menus
+
+import json
+import os
+
+# File Names
+GREETINGS_LOG_FILE = "greetings_log.json"
+SESSION_COUNT_FILE = "session_counts.json"
 
 def greet(name, times):
-    for i in range(times):
-        print(f"Hello {name}! (greeting {i+1})")
+    return [f"Hello, {name}!" for _ in range(times)]
+
 
 
 def farewell(name):
@@ -15,78 +23,115 @@ def farewell(name):
 def custom_farewell(name, farewell_message):
     print(f"{farewell_message}, {name}!")
 
-
-def save_table_to_file(name, number, table):
-    """Saves the multiplication table to a log file."""
-    with open("greetings_log.txt", "a") as file:
-        file.write(f"{name}'s multiplication table for {number}:\n")
-        for line in table:
-            file.write(line + "\n")
-        file.write("-" * 30 + "\n")
-
-
-def read_greetings_log():
-    """Reads and returns the contents of greetings_log.txt."""
+def load_sessions(filename="greetings_log.json"):
     try:
-        with open("greetings_log.txt", "r") as file:
-            return file.read()
+        with open(filename, "r") as f:
+            sessions = json.load(f)
+
+            # Safety check: Json must be on list
+            if not isinstance(sessions, list):
+                return[]
+            
+            return sessions
     except FileNotFoundError:
-        return "The greetings log file does not exist yet."
+        return []
+    
+def save_sessions(sessions, filename="greetings_log.json"):
+    with open(filename, "w") as f:
+        json.dump(sessions, f, indent=4)
 
+def save_table_to_file(name, greetings_count, number, farewell_message=None):
+    """ Build a multiplication table, saves the session to json, and returns the 
+     table for display in main.py
+    """
+    table = [f"{number} x {i} = {number * i}" for i in range(1, 11)]
 
-def parse_greetings_log():
-    """Parse greetings_log.txt into structured data."""
-    sessions = []
-    current_session = None
-    header_re = re.compile(r"^(?P<name>.+?)'s multiplication table for (?P<number>\d+):$")
+    # Build sessions dictionary
+    session = {
+        "name": name,
+        "greetings": greetings_count,
+        "farewell": farewell_message or "",
+        "multiplication_number": number,
+        "multiplication_table": table,
+    }
 
+    sessions = load_sessions()
+    sessions.append(session)
+    save_sessions(sessions)
+
+    return table
+
+# SESSION COUNT PER USER (DICT)
+def load_session_counts(filename=SESSION_COUNT_FILE):
     try:
-        with open("greetings_log.txt", "r") as file:
-            for line in file:
-                line = line.strip()
+        with open(filename, "r") as f:
+            counts = json.load(f)
 
-                if not line:
-                    continue  # Skip empty lines
+            if not isinstance(counts, dict):
+                return {}
 
-                if line.startswith("-"):
-                    if current_session:
-                        sessions.append(current_session)
-                        current_session = None
-                    continue
-
-                # Header lines like "Alice's multiplication table for 5:"
-                m = header_re.match(line)
-                if m:
-                    name = m.group("name")
-                    number = int(m.group("number"))
-                    current_session = {"name": name, "multiplication_number": number, "table": []}
-                    continue
-
-                # Table entry lines, e.g. "5 x 1 = 5"
-                if " x " in line and current_session:
-                    current_session["table"].append(line)
-                    continue
-
-                # Fallback: if we encounter an unexpected line, start a session with raw name
-                if not current_session:
-                    current_session = {"name": line, "multiplication_number": None, "table": []}
-
-        if current_session:
-            sessions.append(current_session)
+            return counts
     except FileNotFoundError:
-        pass
+        return {}
+    
+def parse_greetings_log(filename=GREETINGS_LOG_FILE):
+    """
+    Parse the greetings log into a clean list of session dictionaries.
+    """
+    sessions = load_sessions(filename)
 
-    return sessions
-
-
-def count_sessions(sessions):
-    """Counts total number of sessions in the log."""
-    return len(sessions)
-
-
-def list_user_names(sessions):
-    """Return a list of all user names from the sessions."""
-    names = set()
+    parsed = []
     for session in sessions:
-        names.add(session["name"])
-    return list(names)
+        parsed.append({
+            "name": session.get("name", ""),
+            "greetings": session.get("greetings", 0),
+            "multiplication_number": session.get("multiplication_number", 0),
+            "multiplication_table": session.get("multiplication_table", []),
+            "farewell": session.get("farewell", "")
+        })
+
+    return parsed
+
+
+
+def save_session_counts(counts, filename=SESSION_COUNT_FILE):
+    with open(filename, "w") as f:
+        json.dump(counts, f, indent=4)
+
+
+def increment_user_session(name):
+    counts = load_session_counts()
+
+    if name in counts:
+        counts[name] += 1
+    else:
+        counts[name] = 1
+
+    save_session_counts(counts)
+    return counts[name]
+
+
+def display_session_counts():
+    counts = load_session_counts()
+
+    if not counts:
+        print("\nNo session counts recorded yet.")
+        return
+
+    print("\n--- Session Count Per User ---")
+    for name, count in counts.items():
+        print(f"{name}: {count}")
+
+   # Session Queries
+def list_user_names(sessions):
+    return sorted(set(session["name"] for session in sessions))
+
+def find_sessions_by_name(sessions, name):
+     search_name = search_name.lower().strip()
+     matches = []
+
+     for s in sessions:
+        if s["name"].lower() == search_name:
+            matches.append(s)
+
+     return matches
