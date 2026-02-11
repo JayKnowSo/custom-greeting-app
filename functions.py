@@ -10,7 +10,7 @@ import json
 GREETINGS_LOG_FILE = "greetings_log.json"
 SESSION_COUNT_FILE = "session_counts.json"
 
-def greet(name, times):
+def greet(name: str, times: int) -> list[str]:
     return [f"Hello, {name}!" for _ in range(times)]
 
 
@@ -32,6 +32,7 @@ def load_sessions(filename="greetings_log.json"):
                 return[]
             
             return sessions
+        
     except FileNotFoundError:
         return []
     
@@ -77,6 +78,6 @@ def save_session_counts(counts, filename="Greetings_Log_File"):
     with open(filename, "w") as f:
         json.dump(counts, f, indent=4)
 
-def find_sessions_by_name(sessions, name):
+def find_sessions_by_name(sessions: list[dict], name: str) -> list[dict]:
      search_name = name.lower().strip()
      return [s for s in sessions if s["name"].lower() == search_name]
