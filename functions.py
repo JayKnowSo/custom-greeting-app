@@ -3,12 +3,12 @@
 # Functions return values or print messages
 # JSON handles persistence
 # Main.py only controls flow and menus
+# Greeting App helper functions for main.py
 
 import json
 
 # File Names
 GREETINGS_LOG_FILE = "greetings_log.json"
-SESSION_COUNT_FILE = "session_counts.json"
 
 def greet(name: str, times: int) -> list[str]:
     return [f"Hello, {name}!" for _ in range(times)]
@@ -81,3 +81,26 @@ def save_session_counts(counts, filename="Greetings_Log_File"):
 def find_sessions_by_name(sessions: list[dict], name: str) -> list[dict]:
      search_name = name.lower().strip()
      return [s for s in sessions if s["name"].lower() == search_name]
+
+def compute_session_stats(sessions: list[dict]) -> dict:
+    """
+    Compute summary statistics from session list.
+    Returns a dict with total_sessions, total_greetings,
+    unique_users, and most_used_number.
+    """
+    stats = {
+        "total_sessions": len(sessions),
+        "total_greetings": sum(s["greetings"] for s in sessions),
+        "unique_users": len(set(s["name"].lower() for s in sessions)),
+        "most_used_number": None,
+    }
+
+    if sessions:
+        number_counts = {}
+        for s in sessions:
+            num = s["multiplication_number"]
+            number_counts[num] = number_counts.get(num, 0) + 1
+        # find the number used most often
+        stats["most_used_number"] = max(number_counts, key=number_counts.get)
+
+    return stats

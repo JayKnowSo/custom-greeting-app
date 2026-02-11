@@ -3,17 +3,16 @@
 This module coordinates user interaction and uses helper functions
 from the project to generate greetings and multiplication tables.
 """
+# Greeting App main.py - Controls flow and menus, calls functions from functions.py
 
 from functions import (
     greet,
     custom_farewell,
     load_sessions,
+    save_sessions,
     save_table_to_file,
-    parse_greetings_log,
-    list_user_names,
     find_sessions_by_name,
-    increment_user_session,
-    display_session_counts,
+
     
 )
 from helpers import get_nonempty_name, get_positive_number, get_yes_no
@@ -26,61 +25,12 @@ def debug(msg):
     if DEBUG:
         print(f"[DEBUG] {msg}")
 
-# --- Helper Function To Display Parsed Sessions ---
-def display_parsed_sessions(sessions):
-    """Print all session entries in a readable format:
-       - Name
-       - Greetings count
-       - Multiplication number
-       - Multiplication table
-       - Farewell message (if any)"""
-    for session in sessions:
-        name = session.get("name")
-        greetings = session.get("greetings")
-        number = session.get("multiplication_number", 0)
-        table = session.get("multiplication_table", [])
-        farewell_message = session.get("farewell", "")
-
-        print("\n--- Session ---")
-        print(f"Name: {name}")
-        print(f"Greetings: {greetings}")
-        print(f"Multiplication Number: {number}")
-
-        print(f"\nMultiplication Table for {name}:")
-        for line in table:
-            print(" ", line)
-            if farewell_message: 
-                print(f"\nFarewell Message: {farewell_message}")
-
 def show_menu():
     print("\n=== Greeting App Menu ===")
     print("A) Start a greeting session")
     print("B) View session count per user")
-    print("C) Exit")
-
-def run_greeting_session():
-    print(">>> DEBUG: run_greeting_session CALLED")
-    name = get_nonempty_name()
-    times = get_positive_number(f"How many times should {name} be greeted? ")
-
-    greet(name, times)
-    print()
-
-    number = get_positive_number("Enter a number to generate its multiplication table: ")
-    farewell_message = input("Enter a farewell message: ")
-
-    table = save_table_to_file(name, times, number, farewell_message)
-    print("Table saved to file.\n")
-
-    for line in table:
-        print(" ", line)
-    print()
-
-    custom_farewell(name, farewell_message)
-    # NEW: increment session count
-    session_number = increment_user_session(name)
-    print(f"\nThis was session #{session_number} for {name}\n")
-
+    print("C) Search sessions by name")
+    print("D) Exit")
 
 # --- Main Application Loop ---
 def main():
