@@ -110,7 +110,6 @@ def main():
              for line in table:
                  print(" ", line)
 
-             
              farewell = custom_farewell(name, farewell_message)
              print(farewell)
 
@@ -129,53 +128,28 @@ def main():
 
         elif choice == "c":
              sessions = load_sessions()
-        elif choice == "d":
-            print("\nAll sessions complete.")
-            print("Thank you for using the Greeting App.")
-            break
-        if not sessions:
+        
+             if not sessions:
                print("\nNo sessions saved yet.")
-        continue
+               continue
+             search_name = input("Enter name to search: ")
 
-    search_name = input("Enter name to search: ")
+             matches = find_sessions_by_name(sessions, search_name)
 
-    matches = find_sessions_by_name(sessions, search_name)
+             if not matches:
+               print("\nNo sessions found for that user.")
+             else:
+               print("\n--- Matching Sessions ---")
+               for s in matches:
+                print(f"Name: {s['name']}")
+                print(f"Greetings: {s['greetings']}")
+                print(f"Table #: {s['multiplication_number']}")
+                print("-" * 20)
 
-    if not matches:
-         print("\nNo sessions found for that user.")
-    else:
-        print("\n--- Matching Sessions ---")
-        for s in matches:
-            print(f"Name: {s['name']}")
-            print(f"Greetings: {s['greetings']}")
-            print(f"Table #: {s['multiplication_number']}")
-            print("-" * 20)
-
-    
-    show_log = get_yes_no("Would you like to see the greetings log? (yes/no): ")
-    if show_log == "yes":
-        parsed_sessions = parse_greetings_log()
-
-        if not parsed_sessions:
-            print("\nNo sessions found in the greetings log.\n")
-        else:
-            print("\n--- All Sessions ---")
-            display_parsed_sessions(parsed_sessions)
-
-    search = get_yes_no("Would you like to search for sessions by user name? (yes/no): ")
-    if search == "yes":
-        search_name = get_nonempty_name()
-        matched_sessions = find_sessions_by_name(parsed_sessions, search_name)
-
-        if not matched_sessions:
-            print(f"No sessions found for '{search_name}'.")
-        else:
-            print(f"\n--- Sessions for '{search_name}' ---")
-            display_parsed_sessions(matched_sessions)
-
-    print("\nThank you for using the Greeting App. Goodbye!")
-
-
+        elif choice == "d":
+          print("\nAll sessions complete.")
+          print("Thank you for using the Greeting App.")
+        break
 # Program Entry Point
 if __name__ == "__main__":
     main()

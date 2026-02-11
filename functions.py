@@ -127,11 +127,5 @@ def list_user_names(sessions):
     return sorted(set(session["name"] for session in sessions))
 
 def find_sessions_by_name(sessions, name):
-     search_name = search_name.lower().strip()
-     matches = []
-
-     for s in sessions:
-        if s["name"].lower() == search_name:
-            matches.append(s)
-
-     return matches
+     search_name = name.lower().strip()
+     return [s for s in sessions if s["name"].lower() == search_name]
