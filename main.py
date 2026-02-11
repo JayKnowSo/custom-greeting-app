@@ -12,6 +12,7 @@ from functions import (
     save_sessions,
     save_table_to_file,
     find_sessions_by_name,
+    compute_session_stats,
 
     
 )
@@ -31,6 +32,7 @@ def show_menu():
     print("B) View session count per user")
     print("C) Search sessions by name")
     print("D) Exit")
+    print("E) Show session statistics")
 
 # --- Main Application Loop ---
 def main():
@@ -40,7 +42,7 @@ def main():
 
     while True:
         show_menu()
-        choice = input("Choose an option (A/B/C/D): ").strip().lower()
+        choice = input("Choose an option (A/B/C/D/E): ").strip().lower()
 
         if choice == "a":
              print(">>> DEBUG: run_greeting_session CALLED")
@@ -99,7 +101,24 @@ def main():
         elif choice == "d":
           print("\nAll sessions complete.")
           print("Thank you for using the Greeting App.")
-        break
+          break
+
+        elif choice == "e":
+            sessions = load_sessions()
+
+            if not sessions:
+                print("\nNo sessions saved yet.")
+                continue
+
+            stats = compute_session_stats(sessions)
+
+            print("\n--- Session Statistics ---")
+            print(f"Total sessions: {stats['total_sessions']}")
+            print(f"Total greetings: {stats['total_greetings']}")
+            print(f"Unique users: {stats['unique_users']}")
+            print(f"Most used multiplication number: {stats['most_used_number']}")
+            print("-" * 30)
+
 # Program Entry Point
 if __name__ == "__main__":
     main()
