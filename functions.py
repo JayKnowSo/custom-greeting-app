@@ -10,6 +10,18 @@ import json
 # File Names
 GREETINGS_LOG_FILE = "greetings_log.json"
 
+# Pydantic model
+class SessionModel(BaseModel):
+    name: str
+    greetings: int
+    multiplication_number: int
+    multiplication_table: list[str]
+    farewell: str
+
+# Your helper functions go here
+def greet(name: str, times: int) -> list[str]:
+    ...
+
 def greet(name: str, times: int) -> list[str]:
     return [f"Hello, {name}!" for _ in range(times)]
 
@@ -40,23 +52,29 @@ def save_sessions(sessions, filename="greetings_log.json"):
     with open(filename, "w") as f:
         json.dump(sessions, f, indent=4)
 
-def save_table_to_file(name, greetings_count, number, farewell_message=None):
-    """ Build a multiplication table, saves the session to json, and returns the 
-     table for display in main.py
-    """
+from pydantic import ValidationError
+
+def save_table_to_file(name: str, greetings_count: int, number: int, farewell_message: str = None):
     table = [f"{number} x {i} = {number * i}" for i in range(1, 11)]
 
-    # Build sessions dictionary
-    session = {
-        "name": name,
-        "greetings": greetings_count,
-        "farewell": farewell_message or "",
-        "multiplication_number": number,
-        "multiplication_table": table,
-    }
+    # Build session using Pydantic model
+    try:
+        session = SessionModel(
+            name=name,
+            greetings=greetings_count,
+            multiplication_number=number,
+            multiplication_table=table,
+            farewell=farewell_message or ""
+        )
+    except ValidationError as e:
+        print("Session data is invalid:", e)
+        return []
+
+    # Convert model to dict for saving
+    session_dict = session.dict()
 
     sessions = load_sessions()
-    sessions.append(session)
+    sessions.append(session_dict)
     save_sessions(sessions)
 
     return table
