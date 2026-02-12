@@ -6,6 +6,7 @@
 # Greeting App helper functions for main.py
 
 import json
+from pydantic import BaseModel, ValidationError
 
 # File Names
 GREETINGS_LOG_FILE = "greetings_log.json"
@@ -20,12 +21,7 @@ class SessionModel(BaseModel):
 
 # Your helper functions go here
 def greet(name: str, times: int) -> list[str]:
-    ...
-
-def greet(name: str, times: int) -> list[str]:
     return [f"Hello, {name}!" for _ in range(times)]
-
-
 
 def farewell(name):
     return f"Goodbye {name}! See you next time!"
@@ -41,7 +37,7 @@ def load_sessions(filename="greetings_log.json"):
 
             # Safety check: Json must be on list
             if not isinstance(sessions, list):
-                return[]
+                return []
             
             return sessions
         
@@ -52,19 +48,17 @@ def save_sessions(sessions, filename="greetings_log.json"):
     with open(filename, "w") as f:
         json.dump(sessions, f, indent=4)
 
-from pydantic import ValidationError
-
 def save_table_to_file(name: str, greetings_count: int, number: int, farewell_message: str = None):
     table = [f"{number} x {i} = {number * i}" for i in range(1, 11)]
 
     # Build session using Pydantic model
     try:
         session = SessionModel(
-            name=name,
-            greetings=greetings_count,
-            multiplication_number=number,
-            multiplication_table=table,
-            farewell=farewell_message or ""
+        name=name,
+        greetings=greetings_count,
+        multiplication_number=number,
+        multiplication_table=table,
+        farewell=farewell_message or ""
         )
     except ValidationError as e:
         print("Session data is invalid:", e)
@@ -80,7 +74,7 @@ def save_table_to_file(name: str, greetings_count: int, number: int, farewell_me
     return table
 
 # SESSION COUNT PER USER (DICT)
-def load_session_counts(filename="Greetings_Log_File"):
+def load_session_counts(filename="Greetings_log.json"):
     try:
         with open(filename, "r") as f:
             counts = json.load(f)
@@ -92,7 +86,7 @@ def load_session_counts(filename="Greetings_Log_File"):
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
     
-def save_session_counts(counts, filename="Greetings_Log_File"):
+def save_session_counts(counts, filename="Greetings_log.json"):
     with open(filename, "w") as f:
         json.dump(counts, f, indent=4)
 

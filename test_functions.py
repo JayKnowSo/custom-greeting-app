@@ -1,4 +1,4 @@
-from functions import greet, custom_farewell, find_sessions_by_name, Session_Model
+from functions import greet, custom_farewell, find_sessions_by_name, SessionModel
 from pydantic import ValidationError
 
 def test_greet():
@@ -36,27 +36,3 @@ def test_session_model_bad():
         assert False, "ValidationError was not raised"
     except ValidationError:
         pass  # test passes if exception is raised
-
-try:
-    good_session = SessionModel(
-        name="Alice",
-        greetings=3,
-        multiplication_number=5,
-        multiplication_table=["5 x 1 = 5", "5 x 2 = 10"],
-        farewell="Goodbye"
-    )
-    print("Good session works:", good_session)
-except ValidationError as e:
-    print(e)
-
-try:
-     bad_session = SessionModel(
-        name=123,                 # should be str
-        greetings="three",        # should be int
-        multiplication_number="five",  # should be int
-        multiplication_table="5 x 1 = 5", # should be list[str]
-        farewell=99               # should be str
-    )
-except ValidationError as e:
-    print("Validation error caught!")
-    print(e)
