@@ -5,7 +5,7 @@ from the project to generate greetings and multiplication tables.
 """
 # Greeting App main.py - Controls flow and menus, calls functions from functions.py
 
-from functions import (
+from app.infrastructure.functions import (
     greet,
     custom_farewell,
     load_sessions,

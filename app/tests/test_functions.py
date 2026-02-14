@@ -1,4 +1,4 @@
-from functions import greet, custom_farewell, find_sessions_by_name, SessionModel
+from app.infrastructure.functions import greet, custom_farewell, find_sessions_by_name, SessionModel
 from pydantic import ValidationError
 
 def test_greet():

@@ -1,33 +1,14 @@
-from app.domain.models import SessionModel
-from app.infrastructure.storage import save_session, load_sessions
+from app.infrastructure.functions  import SessionModel, save_table_to_file, load_sessions
+from app.infrastructure.database import SessionRecord, engine
+from sqlmodel import Session as DBSession, select
 from typing import List
 
-class GreetingService:
+def save_session_to_db(name: str, greetings: int, number: int, farewell: str):
+    """
+    Save a session to the SQLite DB using infrastructure function
+    """
+    return save_table_to_file(name, greetings, number, farewell, use_db=True)
 
-    def create_session(self, data: SessionModel) -> SessionModel:
-        greetings = [f"Hello, {data.name}!" for _ in range(data.times)]
-
-        table = [
-            f"{data.number} x {i} = {data.number * i}"
-            for i in range(1, 11)
-   ]
-
-        updated_session = SessionModel(
-           name=data.name,
-           times=data.times,
-           number=data.number,
-           greetings=greetings,
-           table=table,
-           farewell=data.farewell
-       )
-        save_session(updated_session)
-
-        return updated_session
-
-
-    def search_sessions(self, username: str) -> List[SessionModel]:
-        sessions = load_sessions()
-        return [
-            s for s in sessions
-            if s.name.lower() == username.lower()
-        ]
+def get_all_sessions_from_db() -> List[SessionRecord]:
+    with DBSession(engine) as db:
+        return db.exec(select(SessionRecord)).all()

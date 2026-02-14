@@ -7,6 +7,8 @@
 
 import json
 from pydantic import BaseModel, ValidationError
+from app.infrastructure.database import SessionRecord, engine
+from sqlmodel import Session as DBSession
 
 # File Names
 GREETINGS_LOG_FILE = "greetings_log.json"
@@ -48,9 +50,12 @@ def save_sessions(sessions, filename="greetings_log.json"):
     with open(filename, "w") as f:
         json.dump(sessions, f, indent=4)
 
-def save_table_to_file(name: str, greetings_count: int, number: int, farewell_message: str = None):
+def save_table_to_file(name: str, greetings_count: int, number: int, farewell_message: str = None, use_db: bool = False):
     table = [f"{number} x {i} = {number * i}" for i in range(1, 11)]
-
+    """
+    Build multiplication table and save session.
+    If use_db=True, save to SQLite DB; otherwise save to JSON.
+    """
     # Build session using Pydantic model
     try:
         session = SessionModel(
@@ -63,13 +68,21 @@ def save_table_to_file(name: str, greetings_count: int, number: int, farewell_me
     except ValidationError as e:
         print("Session data is invalid:", e)
         return []
-
-    # Convert model to dict for saving
-    session_dict = session.dict()
-
-    sessions = load_sessions()
-    sessions.append(session_dict)
-    save_sessions(sessions)
+    
+    if use_db:
+        db_record = SessionRecord(
+            name=session.name,
+            greetings=session.greetings,
+            multiplication_number=session.multiplication_number,
+            farewell=session.farewell
+        )
+        with DBSession(engine) as db:
+            db.add(db_record)
+            db.commit()
+    else:
+        sessions = load_sessions()
+        sessions.append(session.dict())
+        save_sessions(sessions)
 
     return table
 
