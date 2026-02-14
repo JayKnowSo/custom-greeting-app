@@ -3,12 +3,11 @@
 # It uses FastAPI to create a RESTful API that can be consumed by frontend applications or other services.
 # The API includes endpoints for greeting users, saving session data, searching sessions by name, and retrieving session statistics.
 
-from select import select
-
+from sqlmodel import Session as DBSession, select
 from fastapi import FastAPI, Query
-from app.infrastructure.functions import greet, save_table_to_file, load_sessions, find_sessions_by_name, compute_session_stats, SessionModel
+from app.infrastructure.functions import greet
 from pydantic import BaseModel
-from app.domain.services import save_session_to_db
+from app.domain.services import save_session_to_db, get_all_sessions_from_db
 from app.infrastructure.database import create_db, SessionRecord, engine
 from contextlib import asynccontextmanager
 
@@ -55,7 +54,7 @@ def api_greet(name: str, times: int = Query(1, gt=0)):
 # This endpoint allows clients to save session data to the database. It accepts a POST request with a JSON body that matches the SessionRequest model. The save_table_to_file function is called to save the session data to the database, and the response includes a status message and the saved table data.
 @app.post("/session")
 def api_session(data: SessionRequest):
-    table = save_session_to_db(
+    record = save_session_to_db(
         data.name,
         data.greetings,
         data.number,
@@ -63,7 +62,7 @@ def api_session(data: SessionRequest):
     )
     return {
         "status": "saved to DB",
-        "table": table
+        "id": record.id
     }
 
 # Endpoint to search sessions by name
@@ -85,7 +84,7 @@ def api_search(name: str):
 
 # Endpoint to retrieve session statistics
 # This endpoint computes and returns statistics about the sessions stored in the database. It loads all sessions using the load_sessions function, computes the statistics using the compute_session_stats function, and returns the results in a structured format defined by the StatsResponse model.
-@app.get("/stats", response_model=StatsResponse)
+@app.get("/stats", response_model=StatsResponse, tags = ["Statistics"])
 def api_stats():
     db_sessions = get_all_sessions_from_db()
     stats = {
