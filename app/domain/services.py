@@ -17,5 +17,5 @@ def save_session_to_db(name: str, greetings: int, number: int, farewell: str):
 def get_all_sessions_from_db() -> List[SessionRecord]:
     """ Retrieve all sessions from the SQLite DB using SQLModel"""
     with DBSession(engine) as db:
-        results = db.exec(select(SessionRecord)).all()
-        return results
+        return db.exec(select(SessionRecord)).all()
+        

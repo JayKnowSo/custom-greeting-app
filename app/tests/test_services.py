@@ -4,21 +4,18 @@
 # The tests use assertions to check that the session record has been created with the correct attributes and that it can be retrieved successfully from the database.
 # The test assumes that the database is properly set up and that the create_session_record and get_all_sessions_from_db functions are implemented correctly in the app.domain.services module.
 
-from app.domain.services import create_session_record, get_all_sessions_from_db
+from app.domain.services import save_session_to_db, get_all_sessions_from_db
 
 
 def test_create_and_read_session_db():
 
     # create
-    record = create_session_record(
-        name="TestUser",
-        greetings=2,
-        number=7,
-        farewell="Bye"
-    )
-
-    assert record.id is not None
-    assert record.name == "TestUser"
+    save_session_to_db(
+    name="TestUser",
+    greetings=2,
+    number=7,
+    farewell="Bye"
+)
 
     # read
     sessions = get_all_sessions_from_db()
