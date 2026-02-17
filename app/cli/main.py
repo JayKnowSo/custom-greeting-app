@@ -18,6 +18,7 @@ from app.infrastructure.functions import (
 )
 from helpers import get_nonempty_name, get_positive_number, get_yes_no
 
+
 # --- Debug Helper ---
 DEBUG = False  # Set True to see debug messages
 

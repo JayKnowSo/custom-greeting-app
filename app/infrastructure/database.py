@@ -1,4 +1,4 @@
-from sqlmodel import SQLModel, Field, create_engine
+from sqlmodel import SQLModel, Field, create_engine, Session
 
 # Create the database engine
 # The create_engine function is used to create a connection to the SQLite database. The database file will be created in the same directory as the script if it doesn't already exist.
@@ -25,3 +25,8 @@ class SessionRecord(SQLModel, table=True):
 # The create_db function uses the SQLModel.metadata.create_all method to create the database and the table based on the SessionRecord model. If the database file already exists, it will not be overwritten, and if the table already exists, it will not be recreated.
 def create_db():
     SQLModel.metadata.create_all(engine)
+
+# Dependency function to get a database session
+def get_db():
+    with Session(engine) as session:
+        yield session

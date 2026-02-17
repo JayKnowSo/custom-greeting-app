@@ -3,13 +3,19 @@
 # It uses FastAPI to create a RESTful API that can be consumed by frontend applications or other services.
 # The API includes endpoints for greeting users, saving session data, searching sessions by name, and retrieving session statistics.
 
-from sqlmodel import Session as DBSession, select
-from fastapi import FastAPI, Query
-from app.infrastructure.functions import greet
+from fastapi import FastAPI, Depends, Query
 from pydantic import BaseModel
-from app.domain.services import save_session_to_db, get_all_sessions_from_db
-from app.infrastructure.database import create_db, SessionRecord, engine
+from sqlmodel import Session
 from contextlib import asynccontextmanager
+
+from app.infrastructure.functions import greet
+from app.infrastructure.database import create_db, get_db
+from app.domain.services import (
+    save_session_to_db,
+    search_sessions_by_name,
+    compute_db_stats
+)
+
 
 
 # Lifespan event for startup and shutdown tasks
@@ -53,7 +59,7 @@ def api_greet(name: str, times: int = Query(1, gt=0)):
 # Endpoint to save session data
 # This endpoint allows clients to save session data to the database. It accepts a POST request with a JSON body that matches the SessionRequest model. The save_table_to_file function is called to save the session data to the database, and the response includes a status message and the saved table data.
 @app.post("/session")
-def api_session(data: SessionRequest):
+def api_session(data: SessionRequest, db: Session = Depends(get_db)):
     record = save_session_to_db(
         data.name,
         data.greetings,
@@ -66,38 +72,14 @@ def api_session(data: SessionRequest):
     }
 
 # Endpoint to search sessions by name
-# This endpoint allows clients to search for session records in the database by providing a name as a query parameter. The load_sessions function is used to retrieve all session records from the database, and the find_sessions_by_name function filters the sessions based on the provided name. The results are returned as a list of matching session records.
+# This endpoint allows clients to search for sessions by name. It accepts a query parameter for the
 @app.get("/sessions/search")
-def api_search(name: str):
-    with DBSession(engine) as db:
-        statement = select(SessionRecord).where(SessionRecord.name.ilike(f"%{name}%"))
-        results = db.exec(statement).all()
-    return [
-        {
-            "name": s.name,
-            "greetings": s.greetings,
-            "number": s.multiplication_number,
-            "farewell": s.farewell
-        }
-        for s in results
-    ]
+def api_search(name: str, db: Session = Depends(get_db)):
+    return search_sessions_by_name(db, name)
 
 # Endpoint to retrieve session statistics
-# This endpoint computes and returns statistics about the sessions stored in the database. It loads all sessions using the load_sessions function, computes the statistics using the compute_session_stats function, and returns the results in a structured format defined by the StatsResponse model.
-@app.get("/stats", response_model=StatsResponse, tags = ["Statistics"])
-def api_stats():
-    db_sessions = get_all_sessions_from_db()
-    stats = {
-        "total_sessions": len(db_sessions),
-        "total_greetings": sum(s.greetings for s in db_sessions),
-        "unique_users": len(set(s.name.lower() for s in db_sessions)),
-        "most_used_number": None,
-    }
+# This endpoint allows clients to retrieve statistics about the sessions stored in the database. It uses the
+@app.get("/stats", response_model=StatsResponse, tags=["Statistics"])
+def api_stats(db: Session = Depends(get_db)):
+    return compute_db_stats(db)
 
-    if db_sessions:
-        number_counts = {}
-        for s in db_sessions:
-            number_counts[s.multiplication_number] = number_counts.get(s.multiplication_number, 0) + 1
-        stats["most_used_number"] = max(number_counts, key=number_counts.get)
-
-    return stats

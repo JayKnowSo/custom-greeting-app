@@ -18,4 +18,40 @@ def get_all_sessions_from_db() -> List[SessionRecord]:
     """ Retrieve all sessions from the SQLite DB using SQLModel"""
     with DBSession(engine) as db:
         return db.exec(select(SessionRecord)).all()
-        
+
+
+def compute_db_stats(db: DBSession) -> dict:
+    sessions = db.exec(select(SessionRecord)).all()
+
+    stats = {
+        "total_sessions": len(sessions),
+        "total_greetings": sum(s.greetings for s in sessions),
+        "unique_users": len(set(s.name.lower() for s in sessions)),
+        "most_used_number": None,
+    }
+
+    if sessions:
+        counts = {}
+        for s in sessions:
+            counts[s.multiplication_number] = counts.get(s.multiplication_number, 0) + 1
+        stats["most_used_number"] = max(counts, key=counts.get)
+
+    return stats
+
+# Function to search sessions by name using SQLModel
+def search_sessions_by_name(db, name: str):
+    statement = select(SessionRecord).where(
+        SessionRecord.name.ilike(f"%{name}%")
+    )
+
+    results = db.exec(statement).all()
+
+    return [
+        {
+            "name": s.name,
+            "greetings": s.greetings,
+            "number": s.multiplication_number,
+            "farewell": s.farewell
+        }
+        for s in results
+    ]
