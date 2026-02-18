@@ -3,6 +3,48 @@ from app.infrastructure.database import SessionRecord, engine
 from sqlmodel import Session as DBSession, select
 from typing import List
 
+class GreetingService:
+
+    def __init__(self, db):
+        self.db = db
+
+    def save_session(self, name, greetings, number, farewell):
+        record = SessionRecord(
+            name=name,
+            greetings=greetings,
+            multiplication_number=number,
+            farewell=farewell
+        )
+        self.db.add(record)
+        self.db.commit()
+        self.db.refresh(record)
+        return record
+
+    def get_sessions(self):
+        statement = select(SessionRecord)
+        return self.db.exec(statement).all()
+
+    def get_stats(self):
+        sessions = self.get_sessions()
+
+        stats = {
+            "total_sessions": len(sessions),
+            "total_greetings": sum(s.greetings for s in sessions),
+            "unique_users": len(set(s.name.lower() for s in sessions)),
+            "most_used_number": None,
+        }
+
+        if sessions:
+            counts = {}
+            for s in sessions:
+                counts[s.multiplication_number] = counts.get(
+                    s.multiplication_number, 0
+                ) + 1
+
+            stats["most_used_number"] = max(counts, key=counts.get)
+
+        return stats
+
 
 # Domain services for the Greeting App
 # Services contain business logic and coordinate between infrastructure functions and API routes. They can also include additional logic for validation, data transformation, or complex operations that involve multiple steps.

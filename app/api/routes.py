@@ -5,18 +5,27 @@
 
 from fastapi import FastAPI, Depends, Query
 from pydantic import BaseModel
-from sqlmodel import Session
+from sqlmodel import Session as DBSession, select
 from contextlib import asynccontextmanager
-
+from sqlmodel import Session
 from app.infrastructure.functions import greet
-from app.infrastructure.database import create_db, get_db
+from app.infrastructure.database import create_db, SessionRecord, engine
 from app.domain.services import (
-    save_session_to_db,
     search_sessions_by_name,
-    compute_db_stats
+    GreetingService
 )
 
+def get_db():
+    with DBSession(engine) as session:
+        yield session
 
+
+# Dependency to get the GreetingService instance
+# The get_service function is defined as a dependency that can be injected into API endpoints. 
+# It returns an instance of the GreetingService, which can be used to perform operations related to greeting sessions. 
+# This allows for better separation of concerns and makes it easier to manage dependencies within the API.
+def get_service(db: Session = Depends(get_db)):
+    return GreetingService(db)
 
 # Lifespan event for startup and shutdown tasks
 @asynccontextmanager
@@ -59,17 +68,19 @@ def api_greet(name: str, times: int = Query(1, gt=0)):
 # Endpoint to save session data
 # This endpoint allows clients to save session data to the database. It accepts a POST request with a JSON body that matches the SessionRequest model. The save_table_to_file function is called to save the session data to the database, and the response includes a status message and the saved table data.
 @app.post("/session")
-def api_session(data: SessionRequest, db: Session = Depends(get_db)):
-    record = save_session_to_db(
+def api_session(
+    data: SessionRequest,
+    service: GreetingService = Depends(get_service)
+):
+    record = service.save_session(
         data.name,
         data.greetings,
         data.number,
         data.farewell
     )
-    return {
-        "status": "saved to DB",
-        "id": record.id
-    }
+    return {"status": "saved", "id": record.id}
+
+    
 
 # Endpoint to search sessions by name
 # This endpoint allows clients to search for sessions by name. It accepts a query parameter for the
@@ -77,9 +88,12 @@ def api_session(data: SessionRequest, db: Session = Depends(get_db)):
 def api_search(name: str, db: Session = Depends(get_db)):
     return search_sessions_by_name(db, name)
 
-# Endpoint to retrieve session statistics
-# This endpoint allows clients to retrieve statistics about the sessions stored in the database. It uses the
-@app.get("/stats", response_model=StatsResponse, tags=["Statistics"])
-def api_stats(db: Session = Depends(get_db)):
-    return compute_db_stats(db)
+# Endpoint to get session statistics
+# This endpoint allows clients to retrieve statistics about the greeting sessions. 
+# It uses the GreetingService to compute the statistics and returns a response that matches the StatsResponse model, 
+# providing information about total sessions, total greetings, unique users, and the most used number.
+@app.get("/stats", response_model=StatsResponse)
+def api_stats(service: GreetingService = Depends(get_service)):
+    return service.get_stats()
+
 
