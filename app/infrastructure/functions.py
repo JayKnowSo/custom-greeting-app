@@ -13,13 +13,6 @@ from sqlmodel import Session as DBSession
 # File Names
 GREETINGS_LOG_FILE = "greetings_log.json"
 
-# Pydantic model
-class SessionModel(BaseModel):
-    name: str
-    greetings: int
-    multiplication_number: int
-    multiplication_table: list[str]
-    farewell: str
 
 # Your helper functions go here
 def greet(name: str, times: int) -> list[str]:
