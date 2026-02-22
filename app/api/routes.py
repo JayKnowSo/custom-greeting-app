@@ -3,14 +3,18 @@
 # It uses FastAPI to create a RESTful API that can be consumed by frontend applications or other services.
 # The API includes endpoints for greeting users, saving session data, searching sessions by name, and retrieving session statistics.
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, APIRouter
 from contextlib import asynccontextmanager
 from app.infrastructure.db_repository import SQLSessionRepository
 from app.infrastructure.database import create_db
 from app.domain.services import GreetingService
-from app.domain.repositories import SQLSessionRepository
 from app.domain.models import SessionModel
+from sqlmodel import Session, SQLModel
+from app.infrastructure.database import get_db
 
+def get_serice(db: Session = Depends(get_db)):
+    repo = SQLSessionRepository(db)
+    return GreetingService(repo)
 
 # Lifespan event for startup and shutdown tasks
 @asynccontextmanager
@@ -21,9 +25,17 @@ async def lifespan(app: FastAPI):
 # FastAPI instance
 app = FastAPI(lifespan=lifespan)
 
-repository = SQLSessionRepository()
-service = GreetingService(repository)
 
+router = APIRouter()
+
+@router.post("/session")
+def api_session(data: SessionRequest, service: GreetingService = Depends(get_serice)):
+    record = service.create_session(data)
+    return {"status": "saved", "id": record.id}
+
+@router.get("/")
+def read_root():
+    return {"message": "Hello"}
 
 # Endpoint to save session data
 # This endpoint allows clients to save session data to the database. 

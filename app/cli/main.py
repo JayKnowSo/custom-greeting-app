@@ -5,20 +5,25 @@ from the project to generate greetings and multiplication tables.
 """
 # Greeting App main.py - Controls flow and menus, calls functions from functions.py
 
-from app.infrastructure.functions import (
-    greet,
-    custom_farewell,
-    load_sessions,
-    save_sessions,
-    save_table_to_file,
-    find_sessions_by_name,
-    compute_session_stats,
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
-    
-)
-from helpers import get_nonempty_name, get_positive_number, get_yes_no
+from app.infrastructure.functions import engine
+from sqlmodel import SQLModel
+from app.api import routes as greetings
+from app.domain import models
 
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # startup
+    SQLModel.metadata.create_all(engine)
+    yield
+
+app = FastAPI(lifespan=lifespan)
+
+app.include_router(greetings.router)
 # --- Debug Helper ---
 DEBUG = False  # Set True to see debug messages
 

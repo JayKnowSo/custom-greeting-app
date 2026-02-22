@@ -1,5 +1,14 @@
+import os
+from dotenv import load_dotenv
 from sqlmodel import SQLModel, Field, create_engine, Session
 
+# Load environment variables from a .env file
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable is not set.")
 # Create the database engine
 # The create_engine function is used to create a connection to the SQLite database. The database file will be created in the same directory as the script if it doesn't already exist.
 # The connection string "sqlite:///greetings.db" specifies that we are using SQLite and the database file is greetings.db.
@@ -8,7 +17,7 @@ from sqlmodel import SQLModel, Field, create_engine, Session
 # SQLite is a lightweight, file-based database that is easy to set up and use, making it a good choice for small applications or for development purposes. It does not require a separate server process and allows you to store the entire database in a single file on disk.
 # In this case, we are using SQLite for simplicity, but in a production environment, you might want to use a more robust database system like PostgreSQL or MySQL.
 #SQLite engine creation
-engine = create_engine("sqlite:///greetings.db")
+engine = create_engine(DATABASE_URL, echo=True) # Shows SQL queries in terminal (great for learning)
 
 # This file contains the database model and functions to interact with the database.
 # The SessionRecord class represents a record in the database, and the create_db function creates the database and the table if it doesn't exist.
