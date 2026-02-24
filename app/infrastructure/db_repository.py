@@ -2,41 +2,26 @@
 # This file implements the SQLSessionRepository class,
 #  which is a concrete implementation of the SessionRepository interface defined in repositories.py.
 
-
-from typing import List
+from sqlmodel import Session, select
 from app.domain.models import SessionModel
 from app.domain.repositories import SessionRepository
-from app.infrastructure.database import SessionRecord, engine
-from sqlmodel import Session as DBSession, select
-
 
 class SQLSessionRepository(SessionRepository):
-    def add(self, session: SessionModel):
+    def __init__(self, db: Session):
+        self.db = db
 
-        record = SessionRecord(
-            name=session.name,
-            greetings=session.greetings,
-            number=session.number,
-            farewell=session.farewell,
-        )
+    def add(self, session: SessionModel) -> SessionModel:
+        self.db.add(session)
+        self.db.commit()
+        self.db.refresh(session)
+        return session
 
-        with DBSession(engine) as db:
-            db.add(record)
-            db.commit()
-            db.refresh(record)
-        return record
-    
+    def get_by_username(self, username: str):
+        statement = select(SessionModel).where(SessionModel.name == username)
+        return self.db.exec(statement).all()
 
-    def get_by_username(self, username: str) -> List[SessionModel]:
-        with DBSession(engine) as db:
-            statement = select(SessionRecord).where(SessionRecord.name.ilike(username)
-            )
-            results = db.exec(statement).all()
-            return results
-        
-
-    def get_all_sessions(self) -> List[SessionModel]:
-        with DBSession(engine) as db:
-            return db.exec(select(SessionRecord)).all()
+    def get_all(self):
+        statement = select(SessionModel)
+        return self.db.exec(statement).all()
 
 

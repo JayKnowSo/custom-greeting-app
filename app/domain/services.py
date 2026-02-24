@@ -1,27 +1,28 @@
-from app.domain.models  import SessionModel 
-from app.infrastructure.functions import save_table_to_file
-from app.infrastructure.database import SessionRecord, engine
+from app.domain.models import SessionModel, SessionCreate
 from app.domain.repositories import SessionRepository
-from typing import List
+
 
 class GreetingService:
 
     def __init__(self, repository: SessionRepository):
         self.repository = repository
 
-    
-    
-    def create_session(self, data: SessionModel):
-        return self.repository.add(data)
-    
-    
-    
-    def serch_sessions(self, username: str):
+    def create_session(self, name: str, greetings: int, number: int, farewell: str) -> SessionModel:
+        record = SessionModel(
+            name=name,
+            greetings=greetings,
+            number=number,
+            farewell=farewell
+        )
+        return self.repository.add(record)
+
+    def search_sessions(self, username: str) -> list[SessionModel]:
         return self.repository.get_by_username(username)
 
-    
-    
-    def get_stats(self):
+    def get_sessions(self) -> list[SessionModel]:
+        return self.repository.get_all()
+
+    def get_stats(self) -> dict:
         sessions = self.get_sessions()
 
         stats = {
@@ -34,10 +35,8 @@ class GreetingService:
         if sessions:
             counts = {}
             for s in sessions:
-                counts[s.multiplication_number] = counts.get(
-                    s.multiplication_number, 0
-                ) + 1
+                counts[s.number] = counts.get(s.number, 0) + 1
 
             stats["most_used_number"] = max(counts, key=counts.get)
-            return stats
-    
+
+        return stats

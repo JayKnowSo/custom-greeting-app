@@ -4,17 +4,15 @@
 #  (like databases or files) without needing to know the details of how the data is stored or retrieved.
 
 
-from abc import ABC, abstractmethod
 from typing import List
-from app.domain.models import SessionModel
+from .models import SessionModel
 
-class SessionRepository(ABC):
+class SessionRepository:
+    def add(self, session: SessionModel) -> SessionModel:
+        raise NotImplementedError
 
-    
-    @abstractmethod
-    def add(self, session: SessionModel):
-        pass
-
-    @abstractmethod
     def get_by_username(self, username: str) -> List[SessionModel]:
-        pass
+        raise NotImplementedError
+
+    def get_all(self) -> List[SessionModel]:
+        raise NotImplementedError

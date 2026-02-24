@@ -9,6 +9,7 @@ import json
 from pydantic import BaseModel, ValidationError
 from app.infrastructure.database import SessionRecord, engine
 from sqlmodel import Session as DBSession
+from app.domain.models import SessionModel
 
 # File Names
 GREETINGS_LOG_FILE = "greetings_log.json"
@@ -18,7 +19,7 @@ GREETINGS_LOG_FILE = "greetings_log.json"
 def greet(name: str, times: int) -> list[str]:
     return [f"Hello, {name}!" for _ in range(times)]
 
-def farewell(name):
+def farewell(name: str) -> str:
     return f"Goodbye {name}! See you next time!"
 
 
@@ -54,8 +55,8 @@ def save_table_to_file(name: str, greetings_count: int, number: int, farewell_me
         session = SessionModel(
         name=name,
         greetings=greetings_count,
-        multiplication_number=number,
-        multiplication_table=table,
+        number=number,
+        table=table,
         farewell=farewell_message or ""
         )
     except ValidationError as e:
@@ -66,7 +67,7 @@ def save_table_to_file(name: str, greetings_count: int, number: int, farewell_me
         db_record = SessionRecord(
             name=session.name,
             greetings=session.greetings,
-            multiplication_number=session.multiplication_number,
+            number=session.number,
             farewell=session.farewell
         )
         with DBSession(engine) as db:
@@ -74,13 +75,13 @@ def save_table_to_file(name: str, greetings_count: int, number: int, farewell_me
             db.commit()
     else:
         sessions = load_sessions()
-        sessions.append(session.dict())
+        sessions.append(session.model_dump())
         save_sessions(sessions)
 
     return table
 
 # SESSION COUNT PER USER (DICT)
-def load_session_counts(filename="Greetings_log.json"):
+def load_session_counts(filename="greetings_log.json"):
     try:
         with open(filename, "r") as f:
             counts = json.load(f)
@@ -92,7 +93,7 @@ def load_session_counts(filename="Greetings_log.json"):
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
     
-def save_session_counts(counts, filename="Greetings_log.json"):
+def save_session_counts(counts, filename="greetings_log.json"):
     with open(filename, "w") as f:
         json.dump(counts, f, indent=4)
 

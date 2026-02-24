@@ -1,29 +1,19 @@
-"""Main runner for the Custom Greeting App.
+# CLI Application for Custom Greeting App
+# This file implements the command-line interface (CLI) for the Greeting App. 
+# It provides a menu-driven interface that allows users to interact with the app's functionality directly from the terminal. 
+# Users can start greeting sessions, view session summaries, search for sessions by name, and view session statistics.
 
-This module coordinates user interaction and uses helper functions
-from the project to generate greetings and multiplication tables.
-"""
-# Greeting App main.py - Controls flow and menus, calls functions from functions.py
-
-from fastapi import FastAPI
-from contextlib import asynccontextmanager
-
-from app.infrastructure.functions import engine
-from sqlmodel import SQLModel
-from app.api import routes as greetings
-from app.domain import models
-
+from app.infrastructure.functions import (
+    greet,
+    custom_farewell,
+    save_table_to_file,
+    load_sessions,
+    find_sessions_by_name,
+    compute_session_stats,
+)
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # startup
-    SQLModel.metadata.create_all(engine)
-    yield
 
-app = FastAPI(lifespan=lifespan)
-
-app.include_router(greetings.router)
 # --- Debug Helper ---
 DEBUG = False  # Set True to see debug messages
 

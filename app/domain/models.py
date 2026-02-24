@@ -1,13 +1,18 @@
-# app/domain/models.py
-# This file defines the data models for the Greeting App, 
-# including the SessionModel class and the save_table_to_file function.
-# The SessionModel class represents the structure of a greeting session,
-# while the save_table_to_file function is responsible for saving session data to a file or database
+from typing import Optional
+from sqlmodel import SQLModel, Field
 
 
-from pydantic import BaseModel
+# Request model (used for POST)
+class SessionCreate(SQLModel):
+    name: str
+    greetings: int
+    number: int
+    farewell: str
 
-class SessionModel(BaseModel):
+
+# Database + Response model
+class SessionModel(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
     name: str
     greetings: int
     number: int

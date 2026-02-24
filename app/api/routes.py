@@ -3,71 +3,79 @@
 # It uses FastAPI to create a RESTful API that can be consumed by frontend applications or other services.
 # The API includes endpoints for greeting users, saving session data, searching sessions by name, and retrieving session statistics.
 
-from fastapi import FastAPI, Depends, APIRouter
-from contextlib import asynccontextmanager
+from fastapi import APIRouter, Depends, Body
+from sqlmodel import Session, delete
 from app.infrastructure.db_repository import SQLSessionRepository
-from app.infrastructure.database import create_db
 from app.domain.services import GreetingService
-from app.domain.models import SessionModel
-from sqlmodel import Session, SQLModel
+from app.domain.models import SessionModel, SessionCreate
+from pydantic import BaseModel
 from app.infrastructure.database import get_db
 
-def get_serice(db: Session = Depends(get_db)):
-    repo = SQLSessionRepository(db)
-    return GreetingService(repo)
 
-# Lifespan event for startup and shutdown tasks
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    create_db()  # ensures DB tables exist
-    yield
 
-# FastAPI instance
-app = FastAPI(lifespan=lifespan)
 
+# Explicit request schema for the POST body to ensure OpenAPI shows an object
+class SessionCreateRequest(BaseModel):
+    name: str
+    greetings: int
+    number: int
+    farewell: str
+from app.infrastructure.database import get_db
+# Use `SessionCreate` from app.domain.models (SQLModel-based) to avoid duplicate definitions
 
 router = APIRouter()
 
-@router.post("/session")
-def api_session(data: SessionRequest, service: GreetingService = Depends(get_serice)):
-    record = service.create_session(data)
-    return {"status": "saved", "id": record.id}
+@router.get("/clear")
+def clear_sessions(db: Session = Depends(get_db)):
+    db.exec(delete(SessionModel))
+    db.commit()
+    return {"status": "database cleared"}
 
-@router.get("/")
-def read_root():
-    return {"message": "Hello"}
+# Dependency
+def get_service(db: Session = Depends(get_db)):
+    repo = SQLSessionRepository(db)
+    return GreetingService(repo)
 
-# Endpoint to save session data
-# This endpoint allows clients to save session data to the database. 
-# It accepts a POST request with a JSON body that matches the SessionRequest model. 
-# The save_table_to_file function is called to save the session data to the database, 
-# and the response includes a status message and the saved table data.
-@app.post("/session")
-def api_session(data: SessionModel):
-    record = service.create_session(data)
-    return {"status": "saved", "id": record.id}
-   
-   
-# API Endpoints
-# The following endpoints are defined for the Greeting App API:
-@app.get("/sessions/search")
-def api_search(name: str):
-    return service.search_sessions(name)
+# Test endpoint to verify routes are working
+@router.get("/test")
+def test():
+    return {"message": "Routes working"}
+
+@router.post("/debug")
+def debug_route(data: dict):
+    return data
+
+# Endpoint to create a new greeting session
+@router.post("/session", response_model=SessionModel)
+def create_session_route(data: SessionCreateRequest, service: GreetingService = Depends(get_service)):
+    session = service.create_session(
+        name=data.name,
+        greetings=data.greetings,
+        number=data.number,
+        farewell=data.farewell
+    )
+    return session
+    
 
 
-# Endpoint to search sessions by name
-# This endpoint allows clients to search for sessions by name. It accepts a query parameter for the
-@app.get("/sessions/search")
-def api_search(name: str):
+# Endpoint to search sessions by username
+@router.get("/sessions/search", response_model=list[SessionModel])
+def search_sessions(
+    name: str,
+    service: GreetingService = Depends(get_service)
+):
     return service.search_sessions(name)
 
 # Endpoint to get session statistics
-# This endpoint allows clients to retrieve statistics about the greeting sessions. 
-# It returns a JSON object containing the total number of sessions, total greetings, unique users,
-#  and the most used multiplication number. 
-# The get_stats method of the GreetingService is called to calculate and return these statistics based on the session data stored in the database.
-@app.get("/stats")
-def api_stats():
-    return service.get_stats()
-
-
+@router.get("/stats")
+def get_stats(
+    service: GreetingService = Depends(get_service)
+):
+    stats = service.get_stats()
+    return {
+        "total_sessions": stats.get("total_sessions", 0),
+        "total_greetings": stats.get("total_greetings", 0),
+        "unique_users": stats.get("unique_users", 0),
+        "most_used_number": stats.get("most_used_number", 0)
+    }
+  
