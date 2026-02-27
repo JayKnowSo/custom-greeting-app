@@ -10,6 +10,7 @@ from contextlib import asynccontextmanager
 from sqlmodel import SQLModel
 from app.infrastructure.functions import engine
 from app.api import routes as greetings
+from error_handling import add_exception_handlers
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -18,9 +19,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# Add error handlers
+add_exception_handlers(app)
+
 app.include_router(greetings.router)
 
 @app.get("/")
 def root():
     return {"message": "API is running"}
-()

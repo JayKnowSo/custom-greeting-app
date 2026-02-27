@@ -9,7 +9,7 @@ import json
 from pydantic import BaseModel, ValidationError
 from app.infrastructure.database import SessionRecord, engine
 from sqlmodel import Session as DBSession
-from app.domain.models import SessionModel
+
 
 # File Names
 GREETINGS_LOG_FILE = "greetings_log.json"
@@ -52,7 +52,7 @@ def save_table_to_file(name: str, greetings_count: int, number: int, farewell_me
     """
     # Build session using Pydantic model
     try:
-        session = SessionModel(
+        session = SessionRecord(
         name=name,
         greetings=greetings_count,
         number=number,

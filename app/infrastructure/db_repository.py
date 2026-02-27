@@ -2,26 +2,78 @@
 # This file implements the SQLSessionRepository class,
 #  which is a concrete implementation of the SessionRepository interface defined in repositories.py.
 
+from typing import List
 from sqlmodel import Session, select
-from app.domain.models import SessionModel
 from app.domain.repositories import SessionRepository
+from app.infrastructure.database import SessionRecord
+from app.domain.models import SessionModel
 
 class SQLSessionRepository(SessionRepository):
     def __init__(self, db: Session):
+        """
+        Initializes the repository with a database session.
+        """
         self.db = db
 
     def add(self, session: SessionModel) -> SessionModel:
-        self.db.add(session)
-        self.db.commit()
-        self.db.refresh(session)
-        return session
+        """
+        Adds a new session to the database and returns the inserted session as a SessionModel.
+        """
+        try:
+            record = SessionRecord(
+                name=session.name,
+                greetings=session.greetings,
+                number=session.number,
+                farewell=session.farewell
+            )
+            self.db.add(record)
+            self.db.commit()
+            self.db.refresh(record)
 
-    def get_by_username(self, username: str):
-        statement = select(SessionModel).where(SessionModel.name == username)
-        return self.db.exec(statement).all()
+            return SessionModel(
+                id=record.id,
+                name=record.name,
+                greetings=record.greetings,
+                number=record.number,
+                farewell=record.farewell
+            )
+        except Exception as e:
+            self.db.rollback()  # Rollback in case of any error
+            raise e  # Re-raise the error after logging it
 
-    def get_all(self):
-        statement = select(SessionModel)
-        return self.db.exec(statement).all()
+    def get_by_username(self, username: str) -> List[SessionModel]:
+        """
+        Retrieves sessions that match the given username.
+        """
+        statement = select(SessionRecord).where(SessionRecord.name.ilike(f"%{username}%"))
+        records = self.db.exec(statement).all()
+
+        return [
+            SessionModel(
+                id=r.id,
+                name=r.name,
+                greetings=r.greetings,
+                number=r.number,
+                farewell=r.farewell
+            )
+            for r in records
+        ]
+
+    def get_all(self) -> List[SessionModel]:
+        """
+        Retrieves all sessions from the database.
+        """
+        results = self.db.exec(select(SessionRecord)).all()
+        
+        return [
+            SessionModel(
+                id=r.id,
+                name=r.name,
+                greetings=r.greetings,
+                number=r.number,
+                farewell=r.farewell
+            )
+            for r in results
+        ]
 
 
