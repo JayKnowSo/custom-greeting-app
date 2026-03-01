@@ -1,38 +1,66 @@
-from app.infrastructure.functions import greet, custom_farewell, find_sessions_by_name, SessionModel
-from pydantic import ValidationError
+import pytest
 
+from app.infrastructure.functions import greet, custom_farewell, find_sessions_by_name
+from pydantic import ValidationError
+from app.domain.models import SessionModel
+from typing import List, Dict, Any
+
+# This test file is designed to verify the functionality of the functions defined in the app.infrastructure.functions module.
 def test_greet():
     result = greet("Alice", 3)
     assert result == ["Hello, Alice!"] * 3
 
+# This test verifies that the custom_farewell function correctly formats a farewell message with the given name and farewell message.
 def test_custom_farewell():
     result = custom_farewell("Bob", "Bye")
     assert result == "Bye, Bob!"
 
+# This test verifies that the find_sessions_by_name function correctly finds sessions by name, ignoring case.
 def test_find_sessions_by_name():
-    sessions = [{"name": "Alice", "greetings": 2, "multiplication_number": 5}]
+    # Explicitly telling the linter this is a list of dicts
+    sessions: List[Dict[str, Any]] = [
+        {"name": "Alice", "greetings": 2, "number": 5}
+    ]
     result = find_sessions_by_name(sessions, "alice")
     assert len(result) == 1
 
+# This test verifies that the SessionModel raises validation errors when given incorrect types for its fields.
 def test_session_model_good():
     session = SessionModel(
         name="Alice",
         greetings=3,
-        multiplication_number=5,
-        multiplication_table=["5 x 1 = 5", "5 x 2 = 10"],
+        number=5,
         farewell="Goodbye"
     )
-    assert session.name == "Alice"
 
-def test_session_model_bad():
-    try:
+    assert session.name == "Alice"
+    assert session.greetings == 3
+    assert session.number == 5
+    assert session.farewell == "Goodbye"
+    assert session.result == 15 # 3 * 5 = 15
+    print("Session model properties are correct.")
+   
+
+ # This test verifies that the SessionModel raises validation errors when given incorrect types for its fields.   
+def test_session_model_bad_details():
+    with pytest.raises(ValidationError) as exc_info:
         SessionModel(
             name=123,
             greetings="three",
-            multiplication_number="five",
-            multiplication_table="5 x 1 = 5",
+            number="five",
             farewell=99
         )
-        assert False, "ValidationError was not raised"
-    except ValidationError:
-        pass  # test passes if exception is raised
+    
+    # Get the list of errors from Pydantic
+    errors = exc_info.value.errors()
+    
+    # We expect exactly 4 errors
+    assert len(errors) == 4
+    
+    # Check that 'name' specifically had a string type error
+    assert errors[0]["loc"] == ("name",)
+    assert errors[0]["type"] == "string_type"
+    
+    # Check that 'greetings' specifically had an int parsing error
+    assert errors[1]["loc"] == ("greetings",)
+    assert errors[1]["type"] == "int_parsing"

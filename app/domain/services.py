@@ -1,9 +1,17 @@
+from __future__ import annotations
+
+from typing import List
 from app.domain.models import SessionModel
 from app.domain.repositories import SessionRepository
-from typing import List
 
 
 class GreetingService:
+    """
+    Business logic layer.
+
+    Depends only on the repository interface,
+    not on database implementations.
+    """
 
     def __init__(self, repository: SessionRepository):
         self.repository = repository
@@ -21,9 +29,13 @@ class GreetingService:
         return self.repository.get_all()
 
 
+    def delete_session(self, session_id: int) -> bool:
+        return self.repository.delete(session_id)
+
+
     def get_stats(self) -> dict:
 
-        sessions = self.get_sessions()
+        sessions = self.repository.get_all()
 
         stats = {
             "total_sessions": len(sessions),
@@ -33,6 +45,7 @@ class GreetingService:
         }
 
         if sessions:
+
             counts = {}
 
             for s in sessions:

@@ -3,13 +3,14 @@
 #  which is a concrete implementation of the SessionRepository interface defined in repositories.py.
 
 from typing import List
-from sqlmodel import Session, select
+from sqlmodel import Session as DBSession, select
 from app.domain.repositories import SessionRepository
-from app.infrastructure.database import SessionRecord
+from app.infrastructure.database import SessionRecord, engine
 from app.domain.models import SessionModel
 
+
 class SQLSessionRepository(SessionRepository):
-    def __init__(self, db: Session):
+    def __init__(self, db: DBSession):
         """
         Initializes the repository with a database session.
         """
@@ -75,5 +76,17 @@ class SQLSessionRepository(SessionRepository):
             )
             for r in results
         ]
+   
+    def delete(self, session_id: int) -> bool:
+
+        record = self.db.get(SessionRecord, session_id)
+
+        if record is None:
+            return False
+
+        self.db.delete(record)
+        self.db.commit()
+
+        return True
 
 

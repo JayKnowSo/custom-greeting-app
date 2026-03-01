@@ -45,62 +45,52 @@ def save_sessions(sessions, filename="greetings_log.json"):
         json.dump(sessions, f, indent=4)
 
 def save_table_to_file(name: str, greetings_count: int, number: int, farewell_message: str = None, use_db: bool = False):
+    # ensure numeric types before building SQL/Model to avoid SQLAlchemy emitting DB-specific casts
+    try:
+        greetings_count = int(greetings_count)
+        number = int(number)
+    except (TypeError, ValueError):
+        print("greetings_count and number must be integers")
+        return []
+
     table = [f"{number} x {i} = {number * i}" for i in range(1, 11)]
     """
     Build multiplication table and save session.
     If use_db=True, save to SQLite DB; otherwise save to JSON.
     """
-    # Build session using Pydantic model
+    # Build session using Pydantic/SQLModel model
     try:
         session = SessionRecord(
-        name=name,
-        greetings=greetings_count,
-        number=number,
-        table=table,
-        farewell=farewell_message or ""
+            name=name,
+            greetings=greetings_count,
+            number=number,
+            farewell=farewell_message or ""
         )
     except ValidationError as e:
         print("Session data is invalid:", e)
         return []
     
     if use_db:
-        db_record = SessionRecord(
-            name=session.name,
-            greetings=session.greetings,
-            number=session.number,
-            farewell=session.farewell
-        )
+        # add the validated model instance directly; types are already native Python types
         with DBSession(engine) as db:
-            db.add(db_record)
+            db.add(session)
             db.commit()
+            db.refresh(session)
     else:
         sessions = load_sessions()
         sessions.append(session.model_dump())
         save_sessions(sessions)
 
     return table
-
-# SESSION COUNT PER USER (DICT)
-def load_session_counts(filename="greetings_log.json"):
-    try:
-        with open(filename, "r") as f:
-            counts = json.load(f)
-
-            if not isinstance(counts, dict):
-                return {}
-
-            return counts
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {}
     
 def save_session_counts(counts, filename="greetings_log.json"):
     with open(filename, "w") as f:
         json.dump(counts, f, indent=4)
 
 def find_sessions_by_name(sessions: list[dict], name: str) -> list[dict]:
-     search_name = name.lower().strip()
-     return [s for s in sessions if s["name"].lower() == search_name]
-
+    search_name = name.lower().strip()
+    return [s for s in sessions if s.get("name", "").lower() == search_name.lower()]
+# ...existing code...
 def compute_session_stats(sessions: list[dict]) -> dict:
     """
     Compute summary statistics from session list.
@@ -109,15 +99,15 @@ def compute_session_stats(sessions: list[dict]) -> dict:
     """
     stats = {
         "total_sessions": len(sessions),
-        "total_greetings": sum(s["greetings"] for s in sessions),
-        "unique_users": len(set(s["name"].lower() for s in sessions)),
+        "total_greetings": sum(int(s.get("greetings", 0)) for s in sessions),
+        "unique_users": len(set(s.get("name", "").lower() for s in sessions)),
         "most_used_number": None,
     }
 
     if sessions:
         number_counts = {}
         for s in sessions:
-            num = s["multiplication_number"]
+            num = int(s.get("number", 0))
             number_counts[num] = number_counts.get(num, 0) + 1
         # find the number used most often
         stats["most_used_number"] = max(number_counts, key=number_counts.get)

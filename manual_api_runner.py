@@ -4,6 +4,7 @@
 import json
 from urllib import request, parse
 
+
 print("Starting test script...")
 
 BASE_URL = "http://127.0.0.1:8000"
@@ -70,3 +71,10 @@ print(json.dumps(stats, indent=2))
 print("\nAll sessions in database:")
 status, all_sessions = get_json(f"{BASE_URL}/sessions/search", {"name": ""})  # empty string to fetch all
 print_table(all_sessions, ["id", "name", "greetings", "number", "farewell"])
+
+# Note: You can add more tests for edge cases, invalid input, etc.
+# For example, test searching for a non-existent name, or creating a session with missing fields.
+def main():  # pylint: disable=unused-function
+
+   if __name__ == "__main__":
+        main()

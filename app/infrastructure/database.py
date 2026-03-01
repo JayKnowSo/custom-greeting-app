@@ -1,7 +1,8 @@
 import os
 from dotenv import load_dotenv
 from sqlmodel import SQLModel, Field, create_engine, Session
-from typing import Optional
+from typing import List, Optional
+from sqlalchemy import Column, JSON
 
 # Load environment variables from a .env file
 load_dotenv()
@@ -21,9 +22,10 @@ engine = create_engine(
 class SessionRecord(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
-    greetings: str  # Changed from int to str if it's a greeting message
+    greetings: int  # Changed from int to str if it's a greeting message
     number: int # Changed from int to str if it's a number in string format
     farewell: str
+    
 
 def create_db():
     """

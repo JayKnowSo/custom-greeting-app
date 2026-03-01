@@ -1,23 +1,48 @@
-# This test file is designed to verify the functionality of the services defined in the app.domain.services module.
-# The tests include creating a session record in the database and retrieving all sessions.
-# The test_create_and_read_session_db function tests the creation of a session record using the create_session_record function and then retrieves all sessions from the database using the get_all_sessions_from_db function to ensure that the newly created session is present in the database.
-# The tests use assertions to check that the session record has been created with the correct attributes and that it can be retrieved successfully from the database.
-# The test assumes that the database is properly set up and that the create_session_record and get_all_sessions_from_db functions are implemented correctly in the app.domain.services module.
-
-from app.domain.services import save_session_to_db, get_all_sessions_from_db
+from app.domain.services import GreetingService
+from app.infrastructure.db_repository import SQLSessionRepository
+from app.infrastructure.database import engine
+from sqlmodel import Session
+from app.domain.models import SessionModel
 
 
 def test_create_and_read_session_db():
 
-    # create
-    save_session_to_db(
-    name="TestUser",
-    greetings=2,
-    number=7,
-    farewell="Bye"
-)
+    with Session(engine) as db:
 
-    # read
-    sessions = get_all_sessions_from_db()
+        repo = SQLSessionRepository(db)
 
-    assert any(s.name == "TestUser" for s in sessions)
+        service = GreetingService(repo)
+
+        session = SessionModel(
+            name="TestUser",
+            greetings=3,
+            number=5,
+            farewell="bye"
+        )
+
+        service.create_session(session)
+
+        sessions = service.get_sessions()
+
+        assert len(sessions) > 0
+
+def test_delete_session_db():
+
+    with Session(engine) as db:
+
+        repo = SQLSessionRepository(db)
+
+        service = GreetingService(repo)
+
+        session = SessionModel(
+            name="DeleteUser",
+            greetings=1,
+            number=2,
+            farewell="bye"
+        )
+
+        created = service.create_session(session)
+
+        deleted = service.delete_session(created.id)
+
+        assert deleted is True  

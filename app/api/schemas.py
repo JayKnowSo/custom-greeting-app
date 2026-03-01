@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 class SessionCreate(BaseModel):
     name: str
-    greetings: str
+    greetings: int
     number: int
     farewell: str
 
