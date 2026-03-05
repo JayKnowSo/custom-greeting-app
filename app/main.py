@@ -10,7 +10,8 @@ from contextlib import asynccontextmanager
 from sqlmodel import SQLModel
 from app.infrastructure.functions import engine
 from app.api import routes as greetings
-from error_handling import add_exception_handlers
+from app.error_handling import add_exception_handlers
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

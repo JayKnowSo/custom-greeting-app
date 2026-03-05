@@ -1,0 +1,19 @@
+# (modern PEP 621)
+# let’s set up your project so Python always recognizes app as a module without fiddling with PYTHONPATH. 
+# You can do this via either setup.py (classic) or pyproject.toml (modern).
+
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "custom_greeting_app"
+version = "0.1.0"
+dependencies = [
+    "fastapi",
+    "sqlmodel",
+    "psycopg2-binary",
+    "passlib[bcrypt]",
+    "pytest"
+]

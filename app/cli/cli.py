@@ -43,22 +43,22 @@ def main():
         if choice == "a":
              print(">>> DEBUG: run_greeting_session CALLED")
               
-             name = get_nonempty_name()
-             times = get_positive_number(f"How many times should {name} be greeted? ")
+             username = get_nonempty_name()
+             times = get_positive_number(f"How many times should {username} be greeted? ")
 
-             greetings = greet(name, times)
+             greetings = greet(username, times)
              for line in greetings:
                 print(line)
 
              number = get_positive_number("Enter a number to generate its multiplication table: ")
              farewell_message = input("Enter a farewell message: ")
              
-             table = save_table_to_file(name, times, number, farewell_message)
+             table = save_table_to_file(username, times, number, farewell_message)
 
              for line in table:
                  print(" ", line)
 
-             farewell = custom_farewell(name, farewell_message)
+             farewell = custom_farewell(username, farewell_message)
              print(farewell)
 
         elif choice == "b":
@@ -69,7 +69,7 @@ def main():
              else:
               print("\n--- Session Summary ---")
              for s in sessions:
-              print(f"Name: {s['name']}")
+              print(f"userName: {s['username']}")
               print(f"Greetings: {s['greetings']}")
               print(f"Table Number: {s['multiplication_number']}")
               print("-" * 20)
@@ -89,7 +89,7 @@ def main():
              else:
                print("\n--- Matching Sessions ---")
                for s in matches:
-                print(f"Name: {s['name']}")
+                print(f"userName: {s['username']}")
                 print(f"Greetings: {s['greetings']}")
                 print(f"Table #: {s['multiplication_number']}")
                 print("-" * 20)

@@ -3,11 +3,14 @@ from dotenv import load_dotenv
 from sqlmodel import SQLModel, Field, create_engine, Session
 from typing import List, Optional
 from sqlalchemy import Column, JSON
+from pydantic import field_validator
+
 
 # Load environment variables from a .env file
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+print("DATABASE_URL =", DATABASE_URL)
 
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is not set.")
@@ -21,10 +24,16 @@ engine = create_engine(
 
 class SessionRecord(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    name: str
+    username: str
     greetings: int  # Changed from int to str if it's a greeting message
     number: int # Changed from int to str if it's a number in string format
     farewell: str
+
+    @field_validator("greetings", "number")
+    def must_be_positive(cls, v):
+        if v < 0:
+            raise ValueError("Must be positive")
+        return v
     
 
 def create_db():
@@ -42,3 +51,11 @@ def get_db():
     """
     with Session(engine) as session:
         yield session
+
+# Example of a User model that could be used for authentication
+# This is a simple dataclass and not an SQLModel, as it may not be directly stored in the database.
+class UserRecord(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    username: str = Field(index=True, unique=True)
+    hashed_password: str
+    role: str

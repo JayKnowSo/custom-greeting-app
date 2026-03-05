@@ -3,11 +3,11 @@
 def get_nonempty_name():
     """Prompt the user for a non-empty name."""
     while True:
-        name = input("Enter your name:").strip()
-        if name == "":
-            print("Name cannot be empty. Please enter a valid name.")
+        username = input("Enter your username:").strip()
+        if username == "":
+            print("Username cannot be empty. Please enter a valid username.")
         else:
-            return name # Exits loop when valid
+            return username # Exits loop when valid
 
 def get_positive_number(prompt): # May raise ValueError
     while True:

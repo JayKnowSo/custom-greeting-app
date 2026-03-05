@@ -61,7 +61,7 @@ def save_table_to_file(name: str, greetings_count: int, number: int, farewell_me
     # Build session using Pydantic/SQLModel model
     try:
         session = SessionRecord(
-            name=name,
+            username=name,
             greetings=greetings_count,
             number=number,
             farewell=farewell_message or ""
@@ -89,7 +89,7 @@ def save_session_counts(counts, filename="greetings_log.json"):
 
 def find_sessions_by_name(sessions: list[dict], name: str) -> list[dict]:
     search_name = name.lower().strip()
-    return [s for s in sessions if s.get("name", "").lower() == search_name.lower()]
+    return [s for s in sessions if s.get("username", "").lower() == search_name.lower()]
 # ...existing code...
 def compute_session_stats(sessions: list[dict]) -> dict:
     """
