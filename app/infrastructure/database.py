@@ -54,3 +54,4 @@ class UserRecord(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     username: str = Field(index=True, unique=True)
     hashed_password: str
+    role: str = Field(default="user")
