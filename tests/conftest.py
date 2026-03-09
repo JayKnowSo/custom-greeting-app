@@ -6,8 +6,8 @@ import pytest
 from sqlmodel import SQLModel, create_engine, Session as DBSession
 from sqlalchemy.pool import StaticPool
 from fastapi.testclient import TestClient
-
 from app.main import app
+from app.security.limiter import limiter
 from app.infrastructure.database import get_db
 from app.infrastructure.db_repository import SQLSessionRepository, UserRepository
 
@@ -49,3 +49,11 @@ def user_repository(session: DBSession):
 @pytest.fixture
 def session_repository(session: DBSession):
     return SQLSessionRepository(session)
+
+
+@pytest.fixture(autouse=True)
+def disable_rate_limits():
+    from app.main import limiter
+    limiter.enabled = False
+    yield
+    limiter.enabled = False

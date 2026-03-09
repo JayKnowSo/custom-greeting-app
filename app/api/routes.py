@@ -4,7 +4,7 @@
 # The API includes endpoints for greeting users, saving session data, searching sessions by name, and retrieving session statistics.
 
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session, delete
 from app.infrastructure.db_repository import UserRepository, SQLSessionRepository
 from app.domain.services import GreetingService
@@ -13,8 +13,10 @@ from app.infrastructure.database import get_db, SessionRecord
 from app.api.schemas import SessionCreate, SessionResponse, LoginRequest
 from app.security.dependencies import get_current_user, require_admin, require_user, require_readonly
 from app.services.auth_service import AuthService
+from app.security.limiter import limiter
 
 router = APIRouter()
+
 
 
 def get_service(db: Session = Depends(get_db)):
@@ -23,7 +25,9 @@ def get_service(db: Session = Depends(get_db)):
 
 
 @router.get("/clear")
+@limiter.limit("10/minute")
 def clear_sessions(
+    request: Request,
     db: Session = Depends(get_db),
     user=Depends(require_admin)
 ):
@@ -43,7 +47,9 @@ def debug_route(data: dict):
 
 
 @router.post("/sessions", response_model=SessionResponse, status_code=201)
+@limiter.limit("30/minute")
 def create_session_route(
+    request: Request,
     data: SessionCreate,
     user=Depends(require_user),
     service: GreetingService = Depends(get_service)
@@ -55,7 +61,12 @@ def create_session_route(
 
 
 @router.post("/login", status_code=200)
-def login(data: LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def login(
+    request: Request,
+    data: LoginRequest,
+    db: Session = Depends(get_db)
+):
     user_repo = UserRepository(db)
     auth_service = AuthService(user_repo)
     token = auth_service.authenticate_user(data.username, data.password)
@@ -63,7 +74,9 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/sessions/search", response_model=list[SessionResponse])
+@limiter.limit("30/minute")
 def search_sessions(
+    request: Request,
     username: str,
     user=Depends(require_readonly),
     service: GreetingService = Depends(get_service)
