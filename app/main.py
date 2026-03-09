@@ -1,7 +1,9 @@
-# main.py - Entry point for the Greeting App CLI, sets up FastAPI and includes routes
-# This file initializes the FastAPI application, sets up the database, 
-# and includes the API routes defined in routes.py. 
-# It also contains the main function that runs the CLI interface for the Greeting App.
+# The main.py file is the entry point of the FastAPI application. 
+# It sets up the application, including database initialization, middleware, and routes.
+# The app is created with a lifespan function that initializes the database 
+# tables when the app starts.
+# The app includes the API routes from the greetings module and adds middleware for
+# security headers. It also sets up custom exception handlers for rate limit errors.
 
 
 from fastapi import FastAPI
@@ -13,17 +15,28 @@ from app.infrastructure.functions import engine
 from app.api import routes as greetings
 from app.error_handling import add_exception_handlers
 from app.security.limiter import limiter
+from app.security.headers import SecurityHeadersMiddleware
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     SQLModel.metadata.create_all(engine)
     yield
 
+# The FastAPI app is created with the defined lifespan function, 
+# and the limiter is attached to the app state.
+# Custom exception handlers are added to handle rate limit exceeded errors,
+# and the API routes are included in the app. Finally, security headers middleware is added.
+
 app = FastAPI(lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 add_exception_handlers(app)
 app.include_router(greetings.router)
+app.add_middleware(SecurityHeadersMiddleware)
+
+
+# The root endpoint is defined to return a simple message indicating that the API is running.
 
 @app.get("/")
 def root():
