@@ -37,7 +37,7 @@ def print_table(rows, headers):
 try:
     status, resp = get_json(f"{BASE_URL}/clear")
     print(f"Database cleared. Status: {status}, Response: {resp}\n")
-except:
+except Exception:
     print("No clear route found. Continuing without clearing.\n")
 
 # --- Test Data ---

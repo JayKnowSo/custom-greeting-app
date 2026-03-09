@@ -7,9 +7,9 @@ from sqlmodel import SQLModel, create_engine, Session as DBSession
 from sqlalchemy.pool import StaticPool
 from fastapi.testclient import TestClient
 from app.main import app
-from app.security.limiter import limiter
 from app.infrastructure.database import get_db
 from app.infrastructure.db_repository import SQLSessionRepository, UserRepository
+from app.security.limiter import limiter
 
 TEST_DATABASE_URL = "sqlite:///:memory:"
 
@@ -53,7 +53,7 @@ def session_repository(session: DBSession):
 
 @pytest.fixture(autouse=True)
 def disable_rate_limits():
-    from app.main import limiter
+    """Disable rate limiting for all tests by default."""
     limiter.enabled = False
     yield
     limiter.enabled = False

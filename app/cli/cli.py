@@ -1,6 +1,6 @@
 # CLI Application for Custom Greeting App
-# This file implements the command-line interface (CLI) for the Greeting App. 
-# It provides a menu-driven interface that allows users to interact with the app's functionality directly from the terminal. 
+# This file implements the command-line interface (CLI) for the Greeting App.
+# It provides a menu-driven interface that allows users to interact with the app's functionality directly from the terminal.
 # Users can start greeting sessions, view session summaries, search for sessions by name, and view session statistics.
 
 from app.infrastructure.functions import (
@@ -22,6 +22,26 @@ def debug(msg):
     if DEBUG:
         print(f"[DEBUG] {msg}")
 
+def get_nonempty_name() -> str:
+    """Prompt until user enters a non-empty name."""
+    while True:
+        name = input("Enter your name: ").strip()
+        if name:
+            return name
+        print("Name cannot be empty. Please try again.")
+
+
+def get_positive_number(prompt: str) -> int:
+    """Prompt until user enters a positive integer."""
+    while True:
+        try:
+            value = int(input(prompt).strip())
+            if value > 0:
+                return value
+            print("Please enter a number greater than 0.")
+        except ValueError:
+            print("Invalid input. Please enter a whole number.")
+
 def show_menu():
     print("\n=== Greeting App Menu ===")
     print("A) Start a greeting session")
@@ -42,7 +62,7 @@ def main():
 
         if choice == "a":
              print(">>> DEBUG: run_greeting_session CALLED")
-              
+
              username = get_nonempty_name()
              times = get_positive_number(f"How many times should {username} be greeted? ")
 
@@ -52,7 +72,7 @@ def main():
 
              number = get_positive_number("Enter a number to generate its multiplication table: ")
              farewell_message = input("Enter a farewell message: ")
-             
+
              table = save_table_to_file(username, times, number, farewell_message)
 
              for line in table:
@@ -76,7 +96,7 @@ def main():
 
         elif choice == "c":
              sessions = load_sessions()
-        
+
              if not sessions:
                print("\nNo sessions saved yet.")
                continue
