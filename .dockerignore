@@ -1,0 +1,15 @@
+.venv
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.env
+.git
+.gitignore
+*.md
+tests/
+.pre-commit-config.yaml
+pyproject.toml
+*.egg-info
+greetings_log.json
+session_counts.json
