@@ -1,7 +1,7 @@
 # tests/test_auth_api.py
 # This file contains tests for the authentication API endpoints of the application.
-# The tests verify that the login functionality works correctly, 
-# including successful logins and handling of invalid credentials. 
+# The tests verify that the login functionality works correctly,
+# including successful logins and handling of invalid credentials.
 # It uses the test client provided by FastAPI to simulate HTTP requests to the API.
 
 from app.security.password import hash_password

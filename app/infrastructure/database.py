@@ -5,7 +5,6 @@ import os
 from dotenv import load_dotenv
 from sqlmodel import SQLModel, Field, create_engine, Session
 from typing import Optional
-from sqlalchemy import Column, JSON
 from pydantic import field_validator
 
 load_dotenv()

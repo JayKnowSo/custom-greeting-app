@@ -18,4 +18,3 @@ def test_repository_add(session_repository):
 
     assert saved.id is not None
     assert saved.username == "TestUserRepo"
-  

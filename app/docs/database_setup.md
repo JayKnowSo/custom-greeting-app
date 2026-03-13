@@ -25,7 +25,7 @@ Privileges granted: GRANT ALL PRIVILEGES ON DATABASE greeting_app TO greeting_us
 ## Test Connection
 Command: psql -U greeting_user -d greeting_app -h localhost
 
-## Notes: 
+## Notes:
 - Do not use postgres superuser in production.
 - Use environment Variables for DATABASE_URL.
 - Never commit passwords to Git.

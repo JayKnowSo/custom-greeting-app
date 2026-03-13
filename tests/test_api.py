@@ -57,7 +57,7 @@ def test_protected_create_session(client, user_repository):
         "/login",
         json={"username": "secure_user", "password": "testpassword"}
     )
-    
+
     assert login.status_code == 200, login.text
 
     token = login.json()["access_token"]

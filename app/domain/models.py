@@ -25,6 +25,3 @@ class SessionModel(SQLModel, table=True):
     @property
     def result(self) -> int:
         return self.greetings * self.number
-
-
-   

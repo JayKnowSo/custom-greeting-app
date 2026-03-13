@@ -3,21 +3,21 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 # This test file checks that the security headers are present on every response from the API,
-# and that they have the correct values. It also checks that the Server header is removed 
+# and that they have the correct values. It also checks that the Server header is removed
 # to prevent fingerprinting of the server stack. The tests ensure that the security
 # headers are included on both successful
 
 client = TestClient(app)
 
-# The test_security_headers_present_on_every_response function checks 
+# The test_security_headers_present_on_every_response function checks
 # that all the expected security headers are present in the response from the root endpoint.
-# The test_hsts_value_is_correct function verifies that the Strict-Transport-Security 
+# The test_hsts_value_is_correct function verifies that the Strict-Transport-Security
 # header is set to enforce HTTPS for at least one year.
 
 def test_security_headers_present_on_every_response():
     """Every response must carry all security headers."""
     response = client.get("/")
-    
+
     assert "strict-transport-security" in response.headers
     assert "x-content-type-options" in response.headers
     assert "x-frame-options" in response.headers
@@ -27,7 +27,7 @@ def test_security_headers_present_on_every_response():
 
 # The test_no_clickjacking function checks that the X-Frame-Options header is set to DENY,
 # which prevents the page from being embedded in iframes and protects against clickjacking attacks.
-# The test_no_mime_sniffing function verifies that the X-Content-Type-Options header 
+# The test_no_mime_sniffing function verifies that the X-Content-Type-Options header
 # is set to nosniff, which prevents MIME sniffing and ensures that the browser respects the declared content type.
 # The test_csp_blocks_external_sources function checks that the Content-Security-Policy header
 # restricts sources to self only, which helps to block injected scripts and other malicious content.

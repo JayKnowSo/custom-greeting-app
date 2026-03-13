@@ -11,7 +11,7 @@ from app.domain.services import GreetingService
 from app.domain.models import SessionModel
 from app.infrastructure.database import get_db, SessionRecord
 from app.api.schemas import SessionCreate, SessionResponse, LoginRequest
-from app.security.dependencies import get_current_user, require_admin, require_user, require_readonly
+from app.security.dependencies import require_admin, require_user, require_readonly
 from app.services.auth_service import AuthService
 from app.security.limiter import limiter
 
@@ -82,7 +82,3 @@ def search_sessions(
     service: GreetingService = Depends(get_service)
 ):
     return service.search_sessions(username)
-
-
-
-  

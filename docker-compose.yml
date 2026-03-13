@@ -1,0 +1,70 @@
+# Docker Compose configuration for the Greeting App
+# version: '3.8'
+# This configuration defines three services: the main application (app),
+# a PostgreSQL database (db), and a Redis cache (redis).
+# The app service depends on both the db and redis services,
+# ensuring they are healthy before starting.
+# Environment variables are used to configure the database connection and Redis password,
+# which should be defined in a .env file for security and flexibility.
+
+
+services:
+
+  app:
+    build: .
+    container_name: greeting_app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+psycopg://postgres:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - SECRET_KEY=${SECRET_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app_network
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: greeting_db
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d greetingdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app_network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: greeting_redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  app_network:
+    driver: bridge

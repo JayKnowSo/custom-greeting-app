@@ -20,7 +20,7 @@ class UserRepository:
         existing = self.get_by_username(user.username)
         if existing:
              return existing
-        
+
         record = UserRecord(
             username=user.username,
             hashed_password=user.hashed_password,

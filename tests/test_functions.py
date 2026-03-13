@@ -39,9 +39,9 @@ def test_session_model_good():
     assert session.farewell == "Goodbye"
     assert session.result == 15 # 3 * 5 = 15
     print("Session model properties are correct.")
-   
 
- # This test verifies that the SessionModel raises validation errors when given incorrect types for its fields.   
+
+ # This test verifies that the SessionModel raises validation errors when given incorrect types for its fields.
 def test_session_model_bad_details():
     with pytest.raises(ValidationError):
         SessionModel.model_validate(
@@ -52,6 +52,3 @@ def test_session_model_bad_details():
             "farewell": None
         }
         )
-
-
-    

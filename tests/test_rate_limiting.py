@@ -1,12 +1,12 @@
-# This test suite is designed to verify that the rate limiting functionality of the 
+# This test suite is designed to verify that the rate limiting functionality of the
 # API is working as intended.
 # It uses the TestClient from FastAPI to make requests to the API endpoints and
 # checks that the correct status codes are returned when the rate limits are exceeded.
-# The tests cover the /login, /sessions, /sessions/search, and /clear endpoints, 
-# ensuring that they all enforce their respective rate limits to prevent 
-# abuse and protect the application from excessive requests. 
-# The make_token and auth helper functions are used to create JWT tokens and 
-# set up the Authorization header for the test requests, allowing the tests to 
+# The tests cover the /login, /sessions, /sessions/search, and /clear endpoints,
+# ensuring that they all enforce their respective rate limits to prevent
+# abuse and protect the application from excessive requests.
+# The make_token and auth helper functions are used to create JWT tokens and
+# set up the Authorization header for the test requests, allowing the tests to
 # simulate authenticated requests to the protected endpoints.
 
 

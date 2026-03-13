@@ -39,4 +39,4 @@ def test_delete_session_db(session):
 
         deleted = service.delete_session(created.id)
 
-        assert deleted is True  
+        assert deleted is True

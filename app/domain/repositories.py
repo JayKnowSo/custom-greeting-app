@@ -12,19 +12,18 @@ class SessionRepository(ABC):
     @abstractmethod
     def add(self, session: SessionModel) -> SessionModel:
         """Save a session and return the saved session (with id)."""
-      
-    
+
+
     @abstractmethod
     def get_by_username(self, username: str) -> List[SessionModel]:
         """Return all sessions for a username."""
-        
+
 
     @abstractmethod
     def get_all(self) -> List[SessionModel]:
         """Return all sessions."""
-  
+
 
     @abstractmethod
     def delete(self, session_id: int) -> bool:
         """Delete a session by ID."""
-       

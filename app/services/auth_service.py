@@ -12,14 +12,14 @@ class AuthService:
 
     def authenticate_user(self, username: str, password: str):
         user = self.user_repository.get_by_username(username)
-        
+
         # FIX: handle list return
         if isinstance(user, list):
             user = user[0] if user else None
-        
+
         if not user:
             raise HTTPException(status_code=401, detail="Invalid credentials")
-        
+
 
         if not verify_password(password, user.hashed_password):
             raise HTTPException(status_code=401, detail="Invalid credentials")

@@ -6,7 +6,7 @@
 # Greeting App helper functions for main.py
 
 import json
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 from app.infrastructure.database import SessionRecord, engine
 from sqlmodel import Session as DBSession
 
@@ -34,12 +34,12 @@ def load_sessions(filename="greetings_log.json"):
             # Safety check: Json must be on list
             if not isinstance(sessions, list):
                 return []
-            
+
             return sessions
-        
+
     except FileNotFoundError:
         return []
-    
+
 def save_sessions(sessions, filename="greetings_log.json"):
     with open(filename, "w") as f:
         json.dump(sessions, f, indent=4)
@@ -69,7 +69,7 @@ def save_table_to_file(name: str, greetings_count: int, number: int, farewell_me
     except ValidationError as e:
         print("Session data is invalid:", e)
         return []
-    
+
     if use_db:
         # add the validated model instance directly; types are already native Python types
         with DBSession(engine) as db:
@@ -82,7 +82,7 @@ def save_table_to_file(name: str, greetings_count: int, number: int, farewell_me
         save_sessions(sessions)
 
     return table
-    
+
 def save_session_counts(counts, filename="greetings_log.json"):
     with open(filename, "w") as f:
         json.dump(counts, f, indent=4)
