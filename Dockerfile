@@ -3,6 +3,8 @@
 # This keeps the final image clean and small
 FROM python:3.12-slim AS builder
 
+RUN pip install --upgrade pip
+
 WORKDIR /build
 
 # Install build dependencies
@@ -33,6 +35,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copy installed Python packages from builder stage
 COPY --from=builder /install /usr/local
+
+# Upgrade pip in runtime stage to remediate CVE-2025-8869 and CVE-2026-1703
+# Builder pip and runtime pip are separate — must upgrade both
+RUN pip install --upgrade pip
 
 # Create a non-root user — never run as root in production
 # If an attacker exploits the app they get this user, not root
