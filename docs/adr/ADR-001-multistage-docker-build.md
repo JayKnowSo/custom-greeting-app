@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-13  
 **Status:** Accepted  
-**Author:** JayKnowso
+**Author:** Jemel Padilla
 
 ## Context
 
