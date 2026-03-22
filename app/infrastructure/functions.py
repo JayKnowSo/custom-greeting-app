@@ -7,11 +7,13 @@
 
 import json
 from pydantic import ValidationError
-from app.infrastructure.database import SessionRecord, engine
+from app.domain.models import SessionModel
+from app.infrastructure.database import engine
 from sqlmodel import Session as DBSession
 
 
 # File Names
+# Constants for file names used in JSON storage
 GREETINGS_LOG_FILE = "greetings_log.json"
 
 
@@ -26,6 +28,7 @@ def farewell(name: str) -> str:
 def custom_farewell(name, farewell_message):
     return f"{farewell_message}, {name}!"
 
+# This function is used in main.py to load session data from a JSON file.
 def load_sessions(filename="greetings_log.json"):
     try:
         with open(filename, "r") as f:
@@ -40,10 +43,12 @@ def load_sessions(filename="greetings_log.json"):
     except FileNotFoundError:
         return []
 
+# This function is used in main.py to save session data to a JSON file.
 def save_sessions(sessions, filename="greetings_log.json"):
     with open(filename, "w") as f:
         json.dump(sessions, f, indent=4)
 
+# This function is used in main.py to create a multiplication table and save the session data.
 def save_table_to_file(name: str, greetings_count: int, number: int, farewell_message: str = None, use_db: bool = False):
     # ensure numeric types before building SQL/Model to avoid SQLAlchemy emitting DB-specific casts
     try:
@@ -60,7 +65,7 @@ def save_table_to_file(name: str, greetings_count: int, number: int, farewell_me
     """
     # Build session using Pydantic/SQLModel model
     try:
-        session = SessionRecord(
+        session = SessionModel(
             username=name,
             greetings=greetings_count,
             number=number,

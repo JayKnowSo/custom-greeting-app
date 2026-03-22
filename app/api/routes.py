@@ -8,8 +8,8 @@ from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session, delete
 from app.infrastructure.db_repository import UserRepository, SQLSessionRepository
 from app.domain.services import GreetingService
+from app.infrastructure.database import get_db
 from app.domain.models import SessionModel
-from app.infrastructure.database import get_db, SessionRecord
 from app.api.schemas import SessionCreate, SessionResponse, LoginRequest
 from app.security.dependencies import require_admin, require_user, require_readonly
 from app.services.auth_service import AuthService
@@ -31,19 +31,12 @@ def clear_sessions(
     db: Session = Depends(get_db),
     user=Depends(require_admin)
 ):
-    db.exec(delete(SessionRecord))
+    db.exec(delete(SessionModel))
     db.commit()
     return {"status": "database cleared"}
 
 
-@router.get("/test")
-def test():
-    return {"message": "Routes working"}
 
-
-@router.post("/debug")
-def debug_route(data: dict):
-    return data
 
 
 @router.post("/sessions", response_model=SessionResponse, status_code=201)
