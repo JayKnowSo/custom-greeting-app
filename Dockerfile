@@ -3,11 +3,11 @@
 # This keeps the final image clean and small
 FROM python:3.12-slim AS builder
 
-RUN pip install --upgrade pip
-
+# Set working directory first — all subsequent commands run here
 WORKDIR /build
 
 # Install build dependencies
+# gcc and libpq-dev needed to compile psycopg2 from source
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
@@ -17,10 +17,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Only rebuilds when requirements.txt changes
 COPY requirements.txt .
 
-# Install all dependencies into a local folder
+# Upgrade pip then install all dependencies into /install
+# --prefix=/install keeps packages separate from system Python
+# --no-cache-dir reduces image size
 RUN pip install --upgrade pip && \
     pip install --prefix=/install --no-cache-dir -r requirements.txt
-
 
 # ── STAGE 2: RUNTIME ──────────────────────────────────────────────
 # Final image — only what's needed to run the app
@@ -29,6 +30,7 @@ FROM python:3.12-slim AS runtime
 WORKDIR /app
 
 # Install only runtime system dependencies
+# libpq5 = PostgreSQL runtime library (~500KB vs libpq-dev ~30MB)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     && rm -rf /var/lib/apt/lists/*
@@ -60,7 +62,7 @@ EXPOSE 8000
 # Health check — Docker will monitor this
 # If /health returns non-200, container is marked unhealthy
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
 
 # Start the app
 # --host 0.0.0.0 makes it accessible outside the container
